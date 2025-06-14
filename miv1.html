@@ -3,948 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MİV1 Player - Profesyonel Medya Oynatıcı</title>
+    <title>MİV1 Player - Güncel Sürüm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #e74c3c;
-            --dark-bg: #1a1a2e;
-            --sidebar-bg: #16213e;
-            --content-bg: #0f3460;
-            --text-color: #e6e6e6;
-            --highlight-color: #4cc9f0;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --dark: #1e293b;
+            --light: #f8fafc;
         }
-
-        * {
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            display: flex;
-            height: 100vh;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-            overflow: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            color: var(--highlight-color);
-            margin-top: 10px;
-        }
-
-        .logo img {
-            height: 50px;
-        }
-
-        .datetime {
-            padding: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-menu {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-        }
-
-        .nav-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-item.active {
-            background-color: var(--primary-color);
-            border-left: 4px solid var(--highlight-color);
-        }
-
-        .file-manager {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .file-manager h3 {
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: var(--highlight-color);
-        }
-
-        .file-actions {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-
-        .file-btn {
-            padding: 5px 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: var(--text-color);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s;
-        }
-
-        .file-btn:hover {
-            background-color: var(--primary-color);
-        }
-
-        .file-list {
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 0.8rem;
-        }
-
-        .file-item {
-            padding: 5px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .file-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .file-item .file-actions {
-            display: none;
-        }
-
-        .file-item:hover .file-actions {
-            display: flex;
-        }
-
-        .file-item .file-action {
-            color: var(--text-color);
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
-        .file-item .file-action:hover {
-            color: var(--highlight-color);
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--content-bg);
-        }
-
-        .player-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        #mainPlayer {
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-        }
-
-        .player-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 10;
-            flex-direction: column;
-        }
-
-        .player-overlay h2 {
-            margin-bottom: 20px;
-            color: var(--highlight-color);
-        }
-
-        .controls {
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            z-index: 5;
-        }
-
-        .control-btn {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.2rem;
-            margin: 0 5px;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .control-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .progress-container {
-            flex-grow: 1;
-            margin: 0 15px;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background-color: var(--primary-color);
-            border-radius: 5px;
-            width: 0%;
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: -5px;
-            top: -3px;
-            width: 10px;
-            height: 10px;
-            background-color: var(--highlight-color);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .progress-container:hover .progress-bar::after {
-            opacity: 1;
-        }
-
-        .time-display {
-            font-size: 0.9rem;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
-        }
-
-        .volume-slider {
-            width: 80px;
-            margin-left: 5px;
-            display: none;
-        }
-
-        .volume-container:hover .volume-slider {
-            display: block;
-        }
-
-        /* Content Area Styles */
-        .content-area {
-            padding: 20px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .content-area.active {
-            display: block;
-        }
-
-        .section-title {
-            margin-bottom: 15px;
-            color: var(--highlight-color);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 5px;
-        }
-
-        .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            background: #0f172a;
+            color: var(--light);
         }
-
-        .channel-card {
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            overflow: hidden;
+        
+        /* Kanal Listesi */
+        #channel-list {
+            grid-column: 1;
+            grid-row: 2;
+            overflow-y: auto;
+            background: var(--dark);
+            border-right: 1px solid #334155;
+        }
+        
+        .channel-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
             cursor: pointer;
-            transition: all 0.3s;
+            border-bottom: 1px solid #334155;
         }
-
-        .channel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        
+        .channel-item:hover {
+            background: #1e3a8a;
         }
-
-        .channel-thumb {
-            height: 100px;
-            background-size: cover;
-            background-position: center;
+        
+        .channel-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            object-fit: contain;
+        }
+        
+        /* Player Alanı */
+        #player-container {
+            grid-column: 2;
+            grid-row: 1 / span 2;
             position: relative;
+            background: #000;
         }
-
-        .channel-badge {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-        }
-
-        .channel-info {
-            padding: 10px;
-        }
-
-        .channel-info h4 {
-            font-size: 0.9rem;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .channel-info p {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        
+        #video-player {
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
         }
-
-        .modal-content {
-            background-color: var(--sidebar-bg);
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .modal-header {
+        
+        /* Playlist Yöneticisi */
+        #playlist-manager {
+            grid-column: 1 / span 2;
+            grid-row: 3;
+            background: var(--dark);
+            padding: 10px;
+            border-top: 1px solid #334155;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .modal-title {
-            color: var(--highlight-color);
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            color: var(--text-color);
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
             gap: 10px;
-            margin-top: 20px;
         }
-
-        .btn {
-            padding: 8px 15px;
+        
+        .playlist-btn {
+            padding: 8px 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            border: none;
-            font-weight: 500;
         }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
+        
+        .playlist-btn.delete {
+            background: var(--danger);
         }
-
-        .btn-secondary {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-        }
-
-        /* Responsive Design */
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
+            body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
             }
-            
-            .logo h1, .nav-item span, .file-manager h3, .file-btn span {
-                display: none;
+            #channel-list, #player-container {
+                grid-column: 1;
             }
-            
-            .nav-item {
-                justify-content: center;
-                padding: 15px 0;
-            }
-            
-            .file-actions {
-                flex-direction: column;
+            #channel-list {
+                grid-row: 1;
+                height: 150px;
+                border-right: none;
+                border-bottom: 1px solid #334155;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <img src="https://via.placeholder.com/50" alt="MİV1 Logo">
-            <h1>MİV1 Player</h1>
-        </div>
-        
-        <div class="datetime">
-            <div id="current-date"></div>
-            <div id="current-time"></div>
-        </div>
-        
-        <div class="nav-menu">
-            <div class="nav-item active" data-target="tv">
-                <i class="fas fa-tv"></i>
-                <span>TV Kanalları</span>
-            </div>
-            <div class="nav-item" data-target="radio">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radyo Kanalları</span>
-            </div>
-            <div class="nav-item" data-target="music">
-                <i class="fas fa-music"></i>
-                <span>Müzik Player</span>
-            </div>
-            <div class="nav-item" data-target="movies">
-                <i class="fas fa-film"></i>
-                <span>Filmler</span>
-            </div>
-            <div class="nav-item" data-target="favorites">
-                <i class="fas fa-star"></i>
-                <span>Favorilerim</span>
-            </div>
-        </div>
-        
-        <div class="file-manager">
-            <h3><i class="fas fa-folder-open"></i> <span>Playlist Yöneticisi</span></h3>
-            <div class="file-actions">
-                <button class="file-btn" id="add-playlist"><i class="fas fa-plus"></i> <span>Ekle</span></button>
-                <button class="file-btn" id="import-playlist"><i class="fas fa-file-import"></i> <span>İçe Aktar</span></button>
-                <button class="file-btn" id="export-playlist"><i class="fas fa-file-export"></i> <span>Dışa Aktar</span></button>
-            </div>
-            <div class="file-list" id="playlist-list">
-                <!-- Playlistler buraya eklenecek -->
-            </div>
-        </div>
+    <!-- Kanal Listesi -->
+    <div id="channel-list">
+        <div id="channel-count">0 Kanal Yüklü</div>
+        <!-- Kanallar buraya eklenecek -->
     </div>
     
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="player-container">
-            <video id="mainPlayer"></video>
-            
-            <div class="player-overlay" id="playerOverlay">
-                <h2>MİV1 Player</h2>
-                <p>Oynatmak için bir içerik seçin</p>
-            </div>
-            
-            <div class="controls">
-                <button class="control-btn" id="playPauseBtn"><i class="fas fa-play"></i></button>
-                <button class="control-btn" id="stopBtn"><i class="fas fa-stop"></i></button>
-                <button class="control-btn" id="rewindBtn"><i class="fas fa-backward"></i></button>
-                <button class="control-btn" id="forwardBtn"><i class="fas fa-forward"></i></button>
-                
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                
-                <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
-                
-                <div class="volume-container">
-                    <button class="control-btn" id="muteBtn"><i class="fas fa-volume-up"></i></button>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
-                </div>
-                
-                <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
-                <button class="control-btn" id="recordBtn"><i class="fas fa-circle"></i></button>
-            </div>
-        </div>
-        
-        <!-- TV Kanalları -->
-        <div class="content-area active" id="tv-content">
-            <h3 class="section-title">TV Kanalları</h3>
-            <div class="channel-grid" id="tvChannels">
-                <!-- TV kanalları buraya eklenecek -->
-            </div>
-        </div>
-        
-        <!-- Radyo Kanalları -->
-        <div class="content-area" id="radio-content">
-            <h3 class="section-title">Radyo Kanalları</h3>
-            <div class="channel-grid" id="radioChannels">
-                <!-- Radyo kanalları buraya eklenecek -->
-            </div>
-        </div>
-        
-        <!-- Müzik Player -->
-        <div class="content-area" id="music-content">
-            <h3 class="section-title">Müzik Kütüphanesi</h3>
-            <div class="channel-grid" id="musicTracks">
-                <!-- Müzik parçaları buraya eklenecek -->
-            </div>
-        </div>
-        
-        <!-- Filmler -->
-        <div class="content-area" id="movies-content">
-            <h3 class="section-title">Film Kütüphanesi</h3>
-            <div class="channel-grid" id="moviesList">
-                <!-- Filmler buraya eklenecek -->
-            </div>
-        </div>
-        
-        <!-- Favorilerim -->
-        <div class="content-area" id="favorites-content">
-            <h3 class="section-title">Favori İçeriklerim</h3>
-            <div class="channel-grid" id="favoritesList">
-                <!-- Favoriler buraya eklenecek -->
-            </div>
-        </div>
+    <!-- Video Player -->
+    <div id="player-container">
+        <video id="video-player" controls></video>
     </div>
     
-    <!-- Playlist Ekleme Modalı -->
-    <div class="modal" id="playlistModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Yeni Playlist Ekle</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="playlistName">Playlist Adı</label>
-                    <input type="text" id="playlistName" class="form-control" placeholder="Örnek: Türk TV Kanalları">
-                </div>
-                <div class="form-group">
-                    <label for="playlistType">Playlist Türü</label>
-                    <select id="playlistType" class="form-control">
-                        <option value="m3u">M3U Playlist</option>
-                        <option value="mp3">MP3 Playlist</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="playlistFile">Playlist Dosyası</label>
-                    <input type="file" id="playlistFile" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelPlaylist">İptal</button>
-                <button class="btn btn-primary" id="savePlaylist">Kaydet</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Playlist Düzenleme Modalı -->
-    <div class="modal" id="editPlaylistModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Playlist Düzenle</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="editPlaylistName">Playlist Adı</label>
-                    <input type="text" id="editPlaylistName" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Playlist İçerikleri</label>
-                    <div id="playlistItems" style="max-height: 200px; overflow-y: auto; background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelEditPlaylist">İptal</button>
-                <button class="btn btn-primary" id="saveEditPlaylist">Kaydet</button>
-                <button class="btn btn-danger" id="deletePlaylist">Sil</button>
-            </div>
-        </div>
+    <!-- Playlist Yöneticisi -->
+    <div id="playlist-manager">
+        <input type="file" id="playlist-input" accept=".m3u,.m3u8" style="display:none">
+        <button class="playlist-btn" id="load-btn"><i class="fas fa-folder-open"></i> Playlist Yükle</button>
+        <button class="playlist-btn delete" id="delete-btn"><i class="fas fa-trash"></i> Playlist Sil</button>
+        <button class="playlist-btn" id="refresh-btn"><i class="fas fa-sync-alt"></i> Yenile</button>
     </div>
 
     <script>
         // DOM Elementleri
-        const player = document.getElementById('mainPlayer');
-        const playerOverlay = document.getElementById('playerOverlay');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const rewindBtn = document.getElementById('rewindBtn');
-        const forwardBtn = document.getElementById('forwardBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressContainer = document.getElementById('progressContainer');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const muteBtn = document.getElementById('muteBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const recordBtn = document.getElementById('recordBtn');
+        const videoPlayer = document.getElementById('video-player');
+        const channelList = document.getElementById('channel-list');
+        const channelCount = document.getElementById('channel-count');
+        const loadBtn = document.getElementById('load-btn');
+        const deleteBtn = document.getElementById('delete-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const playlistInput = document.getElementById('playlist-input');
         
-        // Sidebar Elementleri
-        const navItems = document.querySelectorAll('.nav-item');
-        const contentAreas = document.querySelectorAll('.content-area');
+        // HLS.js için örnek oluşturma
+        let hls = new Hls();
         
-        // Playlist Elementleri
-        const addPlaylistBtn = document.getElementById('add-playlist');
-        const importPlaylistBtn = document.getElementById('import-playlist');
-        const exportPlaylistBtn = document.getElementById('export-playlist');
-        const playlistList = document.getElementById('playlist-list');
-        
-        // Modal Elementleri
-        const playlistModal = document.getElementById('playlistModal');
-        const editPlaylistModal = document.getElementById('editPlaylistModal');
-        const closeModalBtns = document.querySelectorAll('.close-modal');
-        const cancelPlaylistBtn = document.getElementById('cancelPlaylist');
-        const savePlaylistBtn = document.getElementById('savePlaylist');
-        const cancelEditPlaylistBtn = document.getElementById('cancelEditPlaylist');
-        const saveEditPlaylistBtn = document.getElementById('saveEditPlaylist');
-        const deletePlaylistBtn = document.getElementById('deletePlaylist');
-        
-        // Veri Depolama
-        let playlists = JSON.parse(localStorage.getItem('miv1Playlists')) || [];
+        // Kanal listesi
+        let channels = [];
         let currentPlaylist = null;
-        let isRecording = false;
-        let mediaRecorder;
-        let recordedChunks = [];
         
-        // Tarih ve Saat Güncelleme
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = now.toLocaleDateString('tr-TR', options);
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('tr-TR');
-        }
-        
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-        
-        // Player Kontrolleri
-        player.addEventListener('play', () => {
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            playerOverlay.style.display = 'none';
+        // Playlist yükleme
+        loadBtn.addEventListener('click', () => {
+            playlistInput.click();
         });
         
-        player.addEventListener('pause', () => {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-        });
-        
-        player.addEventListener('timeupdate', () => {
-            const progress = (player.currentTime / player.duration) * 100;
-            progressBar.style.width = `${progress}%`;
-            
-            const currentTime = formatTime(player.currentTime);
-            const duration = formatTime(player.duration);
-            timeDisplay.textContent = `${currentTime} / ${duration}`;
-        });
-        
-        progressContainer.addEventListener('click', (e) => {
-            const width = progressContainer.clientWidth;
-            const clickX = e.offsetX;
-            const duration = player.duration;
-            player.currentTime = (clickX / width) * duration;
-        });
-        
-        playPauseBtn.addEventListener('click', () => {
-            if (player.paused) {
-                player.play();
-            } else {
-                player.pause();
-            }
-        });
-        
-        stopBtn.addEventListener('click', () => {
-            player.pause();
-            player.currentTime = 0;
-        });
-        
-        rewindBtn.addEventListener('click', () => {
-            player.currentTime = Math.max(0, player.currentTime - 10);
-        });
-        
-        forwardBtn.addEventListener('click', () => {
-            player.currentTime = Math.min(player.duration, player.currentTime + 10);
-        });
-        
-        muteBtn.addEventListener('click', () => {
-            player.muted = !player.muted;
-            muteBtn.innerHTML = player.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
-        });
-        
-        volumeSlider.addEventListener('input', () => {
-            player.volume = volumeSlider.value;
-            player.muted = false;
-            muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-        });
-        
-        fullscreenBtn.addEventListener('click', () => {
-            if (player.requestFullscreen) {
-                player.requestFullscreen();
-            } else if (player.webkitRequestFullscreen) {
-                player.webkitRequestFullscreen();
-            }
-        });
-        
-        recordBtn.addEventListener('click', toggleRecording);
-        
-        // Navigasyon Kontrolleri
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-                
-                const target = item.getAttribute('data-target');
-                contentAreas.forEach(area => {
-                    area.classList.remove('active');
-                    if (area.id === `${target}-content`) {
-                        area.classList.add('active');
-                    }
-                });
-            });
-        });
-        
-        // Playlist İşlemleri
-        function loadPlaylists() {
-            playlistList.innerHTML = '';
-            playlists.forEach((playlist, index) => {
-                const playlistItem = document.createElement('div');
-                playlistItem.className = 'file-item';
-                playlistItem.innerHTML = `
-                    <span>${playlist.name}</span>
-                    <div class="file-actions">
-                        <i class="fas fa-edit file-action edit-playlist" data-index="${index}"></i>
-                        <i class="fas fa-trash file-action delete-playlist" data-index="${index}"></i>
-                    </div>
-                `;
-                playlistList.appendChild(playlistItem);
-            });
-            
-            // Playlist düzenleme/silme eventleri
-            document.querySelectorAll('.edit-playlist').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = btn.getAttribute('data-index');
-                    editPlaylist(index);
-                });
-            });
-            
-            document.querySelectorAll('.delete-playlist').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = btn.getAttribute('data-index');
-                    deletePlaylist(index);
-                });
-            });
-            
-            // Playlist seçme
-            document.querySelectorAll('.file-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('file-action')) {
-                        const index = Array.from(playlistList.children).indexOf(item);
-                        loadPlaylistContent(index);
-                    }
-                });
-            });
-        }
-        
-        function loadPlaylistContent(index) {
-            currentPlaylist = playlists[index];
-            const contentArea = document.querySelector('.content-area.active');
-            const channelGrid = contentArea.querySelector('.channel-grid');
-            channelGrid.innerHTML = '';
-            
-            currentPlaylist.items.forEach(item => {
-                const channelCard = document.createElement('div');
-                channelCard.className = 'channel-card';
-                channelCard.innerHTML = `
-                    <div class="channel-thumb" style="background-image: url('${item.thumbnail || 'https://via.placeholder.com/160x90'}')">
-                        <div class="channel-badge">${item.type === 'tv' ? 'TV' : item.type === 'radio' ? 'RADYO' : 'MÜZİK'}</div>
-                    </div>
-                    <div class="channel-info">
-                        <h4>${item.name}</h4>
-                        <p>${item.group || ''}</p>
-                    </div>
-                `;
-                
-                channelCard.addEventListener('click', () => {
-                    playMedia(item.url, item.name);
-                });
-                
-                channelGrid.appendChild(channelCard);
-            });
-        }
-        
-        function playMedia(url, title) {
-            player.src = url;
-            player.play();
-            document.title = `${title} - MİV1 Player`;
-        }
-        
-        function addPlaylist() {
-            playlistModal.style.display = 'flex';
-        }
-        
-        function editPlaylist(index) {
-            const playlist = playlists[index];
-            document.getElementById('editPlaylistName').value = playlist.name;
-            
-            const playlistItems = document.getElementById('playlistItems');
-            playlistItems.innerHTML = '';
-            
-            playlist.items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'file-item';
-                itemElement.innerHTML = `
-                    <span>${item.name}</span>
-                    <div class="file-actions">
-                        <i class="fas fa-trash file-action"></i>
-                    </div>
-                `;
-                playlistItems.appendChild(itemElement);
-            });
-            
-            currentPlaylist = playlist;
-            editPlaylistModal.style.display = 'flex';
-        }
-        
-        function deletePlaylist(index) {
-            if (confirm('Bu playlisti silmek istediğinize emin misiniz?')) {
-                playlists.splice(index, 1);
-                localStorage.setItem('miv1Playlists', JSON.stringify(playlists));
-                loadPlaylists();
-            }
-        }
-        
-        // Modal Kontrolleri
-        addPlaylistBtn.addEventListener('click', addPlaylist);
-        
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                playlistModal.style.display = 'none';
-                editPlaylistModal.style.display = 'none';
-            });
-        });
-        
-        cancelPlaylistBtn.addEventListener('click', () => {
-            playlistModal.style.display = 'none';
-        });
-        
-        savePlaylistBtn.addEventListener('click', () => {
-            const name = document.getElementById('playlistName').value;
-            const type = document.getElementById('playlistType').value;
-            const fileInput = document.getElementById('playlistFile');
-            
-            if (name && fileInput.files.length > 0) {
-                const file = fileInput.files[0];
+        playlistInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
                 const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    let items = [];
-                    
-                    if (type === 'm3u') {
-                        items = parseM3U(content);
-                    } else if (type === 'mp3') {
-                        items = parseMP3Playlist(content);
-                    }
-                    
-                    playlists.push({
-                        name,
-                        type,
-                        items
-                    });
-                    
-                    localStorage.setItem('miv1Playlists', JSON.stringify(playlists));
-                    playlistModal.style.display = 'none';
-                    loadPlaylists();
+                reader.onload = (event) => {
+                    currentPlaylist = file.name;
+                    parseM3U(event.target.result);
+                    updateChannelList();
                 };
-                
                 reader.readAsText(file);
-            } else {
-                alert('Lütfen tüm alanları doldurun!');
             }
         });
         
-        // M3U ve MP3 Playlist Parser
+        // Playlist silme
+        deleteBtn.addEventListener('click', () => {
+            if (confirm('Playlist silinecek, emin misiniz?')) {
+                channels = [];
+                currentPlaylist = null;
+                updateChannelList();
+                videoPlayer.src = '';
+            }
+        });
+        
+        // Yenileme butonu
+        refreshBtn.addEventListener('click', () => {
+            if (channels.length > 0) {
+                playChannel(0); // İlk kanalı tekrar yükle
+            }
+        });
+        
+        // M3U Parser
         function parseM3U(content) {
+            channels = [];
             const lines = content.split('\n');
-            const items = [];
-            let currentItem = {};
+            let currentChannel = {};
             
             lines.forEach(line => {
                 line = line.trim();
@@ -953,152 +194,96 @@
                     const info = line.substring(8).split(',');
                     const params = info[0].split(' ');
                     
-                    currentItem = {
-                        duration: parseInt(params[0]) || -1,
-                        name: info.slice(1).join(',').trim()
+                    currentChannel = {
+                        name: info.slice(1).join(',').trim(),
+                        group: ''
                     };
                     
-                    params.slice(1).forEach(param => {
+                    params.forEach(param => {
                         if (param.startsWith('group-title=')) {
-                            currentItem.group = param.substring(12).replace(/"/g, '');
+                            currentChannel.group = param.substring(12).replace(/"/g, '');
                         } else if (param.startsWith('tvg-logo=')) {
-                            currentItem.thumbnail = param.substring(9).replace(/"/g, '');
+                            currentChannel.logo = param.substring(9).replace(/"/g, '');
                         }
                     });
-                    
-                    currentItem.type = 'tv';
-                } else if (line && !line.startsWith('#')) {
-                    currentItem.url = line;
-                    items.push(currentItem);
-                    currentItem = {};
+                } else if (line && !line.startsWith('#') && line.startsWith('http')) {
+                    currentChannel.url = line;
+                    channels.push(currentChannel);
                 }
             });
-            
-            return items;
         }
         
-        function parseMP3Playlist(content) {
-            const lines = content.split('\n');
-            return lines.filter(line => line.trim()).map(line => {
-                return {
-                    name: line.substring(line.lastIndexOf('/') + 1, line.lastIndexOf('.')),
-                    url: line.trim(),
-                    type: 'music'
-                };
+        // Kanal listesini güncelleme
+        function updateChannelList() {
+            channelList.innerHTML = '';
+            channelCount.textContent = `${channels.length} Kanal Yüklü`;
+            
+            if (channels.length === 0) {
+                channelList.innerHTML = '<div style="padding:15px;text-align:center;">Playlist yükleyin</div>';
+                return;
+            }
+            
+            channels.forEach((channel, index) => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+                channelItem.innerHTML = `
+                    <img src="${channel.logo || 'https://via.placeholder.com/30'}" class="channel-logo" alt="${channel.name}">
+                    <span>${channel.name}</span>
+                `;
+                channelItem.addEventListener('click', () => playChannel(index));
+                channelList.appendChild(channelItem);
             });
+            
+            // İlk kanalı otomatik oynat
+            if (channels.length > 0) {
+                playChannel(0);
+            }
         }
         
-        // Kayıt Fonksiyonu
-        function toggleRecording() {
-            if (!isRecording) {
-                startRecording();
+        // Kanal oynatma
+        function playChannel(index) {
+            const channel = channels[index];
+            
+            if (channel.url.includes('.m3u8')) {
+                // HLS akışı
+                if (Hls.isSupported()) {
+                    hls.loadSource(channel.url);
+                    hls.attachMedia(videoPlayer);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        videoPlayer.play();
+                    });
+                } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Safari için native destek
+                    videoPlayer.src = channel.url;
+                    videoPlayer.play();
+                } else {
+                    alert('Tarayıcınız bu akış formatını desteklemiyor');
+                }
             } else {
-                stopRecording();
+                // Direkt video
+                videoPlayer.src = channel.url;
+                videoPlayer.play();
             }
-        }
-        
-        function startRecording() {
-            recordedChunks = [];
-            const stream = player.captureStream ? player.captureStream() : player.mozCaptureStream();
             
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = handleDataAvailable;
-            mediaRecorder.start(100);
-            
-            isRecording = true;
-            recordBtn.innerHTML = '<i class="fas fa-square"></i>';
-            recordBtn.style.color = 'red';
+            // Seçili kanalı vurgula
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.style.background = 'transparent';
+            });
+            document.querySelectorAll('.channel-item')[index].style.background = '#1e3a8a';
         }
         
-        function stopRecording() {
-            mediaRecorder.stop();
-            isRecording = false;
-            recordBtn.innerHTML = '<i class="fas fa-circle"></i>';
-            recordBtn.style.color = '';
-        }
-        
-        function handleDataAvailable(event) {
-            if (event.data.size > 0) {
-                recordedChunks.push(event.data);
-                downloadRecording();
+        // Hata yönetimi
+        videoPlayer.addEventListener('error', () => {
+            console.error('Oynatıcı hatası:', videoPlayer.error);
+            alert('Yayın açılamadı. Sonraki kanala geçiliyor...');
+            const currentIndex = channels.findIndex(c => c.url === videoPlayer.src);
+            if (currentIndex < channels.length - 1) {
+                playChannel(currentIndex + 1);
             }
-        }
+        });
         
-        function downloadRecording() {
-            const blob = new Blob(recordedChunks, { type: 'video/mp4' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `miv1-recording-${new Date().toISOString().slice(0, 19)}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-        }
-        
-        // Yardımcı Fonksiyonlar
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '00:00';
-            
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-        
-        // Örnek Veri Yükleme
-        function loadSampleData() {
-            if (playlists.length === 0) {
-                playlists = [
-                    {
-                        name: "Örnek TV Playlist",
-                        type: "m3u",
-                        items: [
-                            {
-                                name: "TRT 1",
-                                url: "https://example.com/trt1.m3u8",
-                                group: "Yerel",
-                                type: "tv",
-                                thumbnail: "https://via.placeholder.com/160x90?text=TRT+1"
-                            },
-                            {
-                                name: "Show TV",
-                                url: "https://example.com/showtv.m3u8",
-                                group: "Yerel",
-                                type: "tv",
-                                thumbnail: "https://via.placeholder.com/160x90?text=Show+TV"
-                            }
-                        ]
-                    },
-                    {
-                        name: "Örnek Radyo Playlist",
-                        type: "m3u",
-                        items: [
-                            {
-                                name: "TRT FM",
-                                url: "https://example.com/trtfm.mp3",
-                                group: "Yerel",
-                                type: "radio",
-                                thumbnail: "https://via.placeholder.com/160x90?text=TRT+FM"
-                            }
-                        ]
-                    }
-                ];
-                
-                localStorage.setItem('miv1Playlists', JSON.stringify(playlists));
-            }
-        }
-        
-        // Uygulama Başlatma
-        loadSampleData();
-        loadPlaylists();
-        
-        // İlk playlisti yükle
-        if (playlists.length > 0) {
-            loadPlaylistContent(0);
-        }
+        // Başlangıçta boş liste göster
+        updateChannelList();
     </script>
 </body>
 </html>
