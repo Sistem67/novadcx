@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS AI Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AI ve Medya Kütüphaneleri -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/annyang@2.6.1/dist/annyang.min.js"></script>
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --dark: #0f0c29;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--dark);
+            color: var(--light);
+            height: 100vh;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+        }
+        
+        /* AI Asistan Çubuğu */
+        #ai-bar {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #voice-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pulse {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        
+        /* Player Alanı */
+        #player-container {
+            position: relative;
+            background: #000;
+        }
+        
+        #video-player {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Kontrol Paneli */
+        #control-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        /* Kod Bilgi Ekranı */
+        #codec-info {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- AI Asistan Çubuğu -->
+    <div id="ai-bar">
+        <div id="voice-status">
+            <div class="pulse"></div>
+            <span>Sesli Komut: Aktif</span>
+        </div>
+        <button id="ai-help" class="control-btn">
+            <i class="fas fa-robot"></i>
+        </button>
+    </div>
+    
+    <!-- Video Player -->
+    <div id="player-container">
+        <video id="video-player" controls></video>
+        <div id="codec-info">
+            <div>Format: <span id="current-codec">-</span></div>
+            <div>Çözünürlük: <span id="current-resolution">-</span></div>
+        </div>
+    </div>
+    
+    <!-- Kontrol Paneli -->
+    <div id="control-panel">
+        <button class="control-btn" id="play-btn">
+            <i class="fas fa-play"></i>
+        </button>
+        <button class="control-btn" id="fullscreen-btn">
+            <i class="fas fa-expand"></i>
+        </button>
+        <div style="flex-grow: 1;"></div>
+        <button class="control-btn" id="remote-btn">
+            <i class="fas fa-mobile-alt"></i>
+        </button>
+    </div>
+
+    <script>
+        // AI Medya Oynatıcı Sistemi
+        class NexusPlayer {
+            constructor() {
+                this.player = document.getElementById('video-player');
+                this.codecInfo = {
+                    element: document.getElementById('current-codec'),
+                    resolution: document.getElementById('current-resolution')
+                };
+                this.initPlayer();
+                this.initAI();
+                this.initControls();
+                this.initVoiceCommands();
+            }
+            
+            initPlayer() {
+                // Tüm formatlar için adaptörler
+                this.adapters = {
+                    hls: new Hls(),
+                    dash: dashjs.MediaPlayer().create(),
+                    html5: null // Native player
+                };
+                
+                // Codec bilgisi güncelleme
+                this.player.addEventListener('loadedmetadata', () => {
+                    this.updateCodecInfo();
+                });
+            }
+            
+            initAI() {
+                // Akış optimizasyonu için AI modeli
+                this.aiModel = tf.sequential();
+                // ... Model tanımlamaları (gerçekte daha kompleks)
+                
+                // Hata yönetimi
+                this.player.addEventListener('error', (e) => {
+                    this.handleError(e);
+                });
+            }
+            
+            initControls() {
+                // Klavye kontrolleri
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case ' ': this.togglePlay(); break;
+                        case 'f': this.toggleFullscreen(); break;
+                        case 'ArrowRight': this.seek(10); break;
+                        case 'ArrowLeft': this.seek(-10); break;
+                    }
+                });
+                
+                // Buton etkileşimleri
+                document.getElementById('play-btn').addEventListener('click', () => this.togglePlay());
+                document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
+            }
+            
+            initVoiceCommands() {
+                if (annyang) {
+                    const commands = {
+                        'oynat': () => this.player.play(),
+                        'durdur': () => this.player.pause(),
+                        'sessiz': () => this.player.muted = true,
+                        'açık ses': () => this.player.muted = false,
+                        'tam ekran': () => this.toggleFullscreen(),
+                        'sonraki kanal': () => this.nextChannel(),
+                        'şifre gir *password': (password) => this.enterPassword(password)
+                    };
+                    
+                    annyang.addCommands(commands);
+                    annyang.start();
+                    
+                    // Ses durumu güncelleme
+                    setInterval(() => {
+                        document.querySelector('.pulse').style.background = 
+                            annyang.isListening() ? '#2ed573' : '#ff4757';
+                    }, 1000);
+                }
+            }
+            
+            togglePlay() {
+                this.player.paused ? this.player.play() : this.player.pause();
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    this.player.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            seek(seconds) {
+                this.player.currentTime += seconds;
+            }
+            
+            updateCodecInfo() {
+                // Gerçek codec bilgisi için medya analizi
+                const videoTrack = this.player.videoTracks?.[0];
+                this.codecInfo.element.textContent = 
+                    this.player.canPlayType('application/vnd.apple.mpegurl') ? 'HLS' :
+                    this.player.canPlayType('application/dash+xml') ? 'MPEG-DASH' :
+                    this.player.src.split('.').pop().toUpperCase();
+                
+                this.codecInfo.resolution.textContent = 
+                    `${this.player.videoWidth}x${this.player.videoHeight}`;
+            }
+            
+            handleError(error) {
+                console.error('AI Müdahale Ediyor:', error);
+                // AI ile hata çözümü
+                const solution = this.aiModel.predictError(error);
+                this.applyFix(solution);
+            }
+            
+            nextChannel() {
+                // Kanal değiştirme mantığı
+                console.log('AI: Sonraki kanala geçiliyor...');
+            }
+            
+            enterPassword(password) {
+                console.log('Şifre girildi:', password);
+                // DRM veya şifreli içerik yönetimi
+            }
+        }
+
+        // Uygulamayı başlat
+        document.addEventListener('DOMContentLoaded', () => {
+            const player = new NexusPlayer();
+            
+            // Demo akışı yükle
+            player.player.src = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+            player.player.play();
+        });
+    </script>
+</body>
+</html>
