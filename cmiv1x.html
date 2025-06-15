@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MİV1PRO+ Medya Oynatıcı - Tam Entegre</title>
+  <style>
+    /* --- Genel Tasarım --- */
+    body {
+      margin: 0; padding: 0; background: #121212; color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex; height: 100vh; overflow: hidden;
+      user-select: none;
+    }
+    #playlist {
+      width: 280px; background: #1e1e1e; overflow-y: auto;
+      border-right: 1px solid #333;
+      display: flex; flex-direction: column;
+    }
+    #playlist h2 {
+      margin: 10px; font-weight: 600; font-size: 20px; text-align: center;
+      border-bottom: 1px solid #444; padding-bottom: 5px;
+    }
+    .channel {
+      padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #333;
+      transition: background-color 0.3s;
+      position: relative;
+    }
+    .channel:hover, .channel.selected {
+      background-color: #333;
+    }
+    .channel.secured::after {
+      content: "🔒"; position: absolute; right: 15px; top: 12px;
+    }
+    #player-container {
+      flex: 1; display: flex; flex-direction: column;
+      background: #000; position: relative;
+      align-items: center; justify-content: center;
+    }
+    header {
+      height: 48px; background: #222;
+      color: #eee; display: flex;
+      align-items: center; justify-content: space-between;
+      padding: 0 15px; font-weight: 600;
+      font-size: 18px;
+      user-select: none;
+    }
+    #info {
+      font-weight: 400; font-size: 14px;
+    }
+    #video, #yt-player {
+      max-width: 90vw; max-height: 75vh;
+      background: #000;
+      outline: none;
+      border-radius: 6px;
+    }
+    #yt-player {
+      display: none;
+      border: none;
+    }
+    #status-badge {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 3px 8px;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 3px;
+      color: #eee;
+      user-select: none;
+      pointer-events: none;
+      font-family: monospace;
+    }
+    footer {
+      height: 28px; background: #222;
+      color: #aaa; font-size: 12px;
+      text-align: center;
+      line-height: 28px;
+      user-select: none;
+    }
+    #playlist-controls {
+      padding: 8px 10px;
+      background: #1a1a1a;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #playlist-controls button {
+      background: #333;
+      border: none;
+      color: #eee;
+      padding: 5px 10px;
+      margin: 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    #playlist-controls button:hover {
+      background: #555;
+    }
+    #file-input {
+      display: none;
+    }
+    /* Scrollbar */
+    #playlist::-webkit-scrollbar {
+      width: 8px;
+    }
+    #playlist::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
+    }
+    /* Altyazı stil */
+    ::cue {
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #000;
+    }
+  </style>
+</head>
+<body>
+  <div id="playlist" tabindex="0" aria-label="Kanal Listesi">
+    <h2>Kanal Listesi</h2>
+    <!-- Kanallar dinamik eklenecek -->
+  </div>
+  <div id="player-container">
+    <header>
+      <div>MİV1PRO+ Medya Oynatıcı</div>
+      <div id="info" aria-live="polite">
+        Tarih: <span id="date"></span> | Saat: <span id="time"></span> | Durum: <span id="status">Offline</span>
+      </div>
+    </header>
+    <video id="video" controls crossorigin="anonymous" playsinline webkit-playsinline></video>
+    <iframe id="yt-player" allowfullscreen allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div id="status-badge">MİV1PRO+</div>
+    <footer>© 2025 MİV1PRO+ - Tüm Hakları Saklıdır</footer>
+    <div id="playlist-controls" aria-label="Playlist Kontrolleri">
+      <button id="load-playlist-btn" title="Playlist Yükle">Yükle</button>
+      <button id="edit-playlist-btn" title="Playlist Düzenle">Düzenle</button>
+      <button id="delete-playlist-btn" title="Playlist Sil">Sil</button>
+      <input type="file" id="file-input" accept=".m3u,.m3u8,.txt" />
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // --- Global Değişkenler ---
+    const playlistEl = document.getElementById('playlist');
+    const videoEl = document.getElementById('video');
+    const ytPlayer = document.getElementById('yt-player');
+    const statusEl = document.getElementById('status');
+    const dateEl = document.getElementById('date');
+    const timeEl = document.getElementById('time');
+    const statusBadge = document.getElementById('status-badge');
+    const loadPlaylistBtn = document.getElementById('load-playlist-btn');
+    const editPlaylistBtn = document.getElementById('edit-playlist-btn');
+    const deletePlaylistBtn = document.getElementById('delete-playlist-btn');
+    const fileInput = document.getElementById('file-input');
+
+    // Kanallar: id, ad, url, altyazı, şifre (varsa), tip, kategori
+    let channels = [
+      { id: 1, name: 'TRT 1', url: 'https://example.com/trt1.m3u8', subtitle: '', secured: false, type: 'hls', category: 'TV' },
+      { id: 2, name: 'Kanal D', url: 'https://example.com/kanald.m3u8', subtitle: '', secured: false, type: 'hls', category: 'TV' },
+      { id: 3, name: 'YouTube Örnek', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', subtitle: '', secured: false, type: 'youtube', category: 'Film' },
+      { id: 4, name: 'Radyo TRT FM', url: 'https://example.com/trtfm.mp3', subtitle: '', secured: false, type: 'audio', category: 'Radyo' },
+      { id: 5, name: 'Şifreli Örnek Kanal', url: 'https://example.com/secret.m3u8', subtitle: '', secured: true, password: '1234', type: 'hls', category: 'TV' },
+      { id: 6, name: 'Film 1', url: 'https://example.com/film1.mp4', subtitle: 'https://example.com/subtitles/film1.tr.vtt', secured: false, type: 'video', category: 'Film' },
+      { id: 7, name: 'Müzik Listesi', url: 'https://example.com/music.m3u8', subtitle: '', secured: false, type: 'audio', category: 'Müzik' }
+      // İstersen daha fazla ekleyebilirsin
+    ];
+
+    let currentChannelIndex = 0;
+    let autoplayTimeout = null;
+    let speechRecognition = null;
+
+    // --- Fonksiyonlar ---
+
+    // Tarih ve Saat Güncelle
+    function updateDateTime() {
+      const now = new Date();
+      dateEl.textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      timeEl.textContent = now.toLocaleTimeString('tr-TR');
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Kanal Listesini Ekrana Bas
+    function renderPlaylist() {
+      playlistEl.innerHTML = '<h2>Kanal Listesi</h2>';
+      channels.forEach((ch, i) => {
+        const chEl = document.createElement('div');
+        chEl.className = 'channel';
+        if (ch.secured) chEl.classList.add('secured');
+        if (i === currentChannelIndex) chEl.classList.add('selected');
+        chEl.tabIndex = 0;
+        chEl.setAttribute('role', 'button');
+        chEl.setAttribute('aria-pressed', i === currentChannelIndex ? 'true' : 'false');
+        chEl.textContent = `${ch.name} (${ch.category})`;
+        chEl.dataset.index = i;
+        playlistEl.appendChild(chEl);
+      });
+    }
+
+    // Yayını Başlat (Video / Audio / YouTube)
+    function startChannel(index) {
+      if (index < 0 || index >= channels.length) return;
+      const ch = channels[index];
+
+      // Şifre Kontrolü
+      if (ch.secured) {
+        const enteredPass = prompt(`"${ch.name}" yayını için şifre giriniz:`);
+        if (enteredPass !== ch.password) {
+          alert('Hatalı şifre!');
+          return;
+        }
+      }
+
+      clearTimeout(autoplayTimeout);
+      currentChannelIndex = index;
+      renderPlaylist();
+      statusEl.textContent = 'Online';
+
+      // YouTube Kanalıysa
+      if (ch.type === 'youtube') {
+        videoEl.style.display = 'none';
+        ytPlayer.style.display = 'block';
+        ytPlayer.src = ch.url + '?autoplay=1&mute=0';
+      } else {
+        ytPlayer.style.display = 'none';
+        videoEl.style.display = 'block';
+        videoEl.src = ch.url;
+        videoEl.load();
+
+        // Altyazı varsa ekle
+        if (ch.subtitle) {
+          let track = videoEl.querySelector('track');
+          if (!track) {
+            track = document.createElement('track');
+            track.kind = 'subtitles';
+            track.label = 'Altyazı';
+            track.srclang = 'tr';
+            videoEl.appendChild(track);
+          }
+          track.src = ch.subtitle;
+          track.default = true;
+        } else {
+          const tracks = videoEl.querySelectorAll('track');
+          tracks.forEach(t => t.remove());
+        }
+        videoEl.play();
+      }
+
+      // Otomatik yayın atlama 5 saniye içinde hata varsa
+      let errorOccurred = false;
+      function handleError() {
+        if (errorOccurred) return;
+        errorOccurred = true;
+        statusEl.textContent = 'Yayın Hatası, Diğer kanala geçiliyor...';
+        autoplayTimeout = setTimeout(() => {
+          nextChannel();
+        }, 3000);
+      }
+
+      videoEl.onended = nextChannel;
+      videoEl.onerror = handleError;
+      videoEl.onstalled = handleError;
+
+      // YouTube iframe hata yakalama zor, o yüzden sadece video element için
+    }
+
+    // Sonraki Kanal
+    function nextChannel() {
+      let nextIndex = (currentChannelIndex + 1) % channels.length;
+      startChannel(nextIndex);
+    }
+
+    // Önceki Kanal
+    function prevChannel() {
+      let prevIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
+      startChannel(prevIndex);
+    }
+
+    // Klavye ve Uzaktan Kumanda Kontrolleri
+    document.body.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') {
+        nextChannel();
+      } else if (e.key === 'ArrowUp') {
+        prevChannel();
+      } else if (e.key === ' ') {
+        if (videoEl.paused) videoEl.play();
+        else videoEl.pause();
+      }
+    });
+
+    // Kanal Listesine Tıklama veya Enter ile Seçim
+    playlistEl.addEventListener('click', e => {
+      if (e.target.classList.contains('channel')) {
+        startChannel(parseInt(e.target.dataset.index));
+      }
+    });
+    playlistEl.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('channel')) {
+        startChannel(parseInt(e.target.dataset.index));
+      }
+    });
+
+    // Sesli Komut Sistemi (Google Web Speech API)
+    function setupSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        console.log('Tarayıcı sesli komut desteklemiyor.');
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      speechRecognition = new SpeechRecognition();
+      speechRecognition.lang = 'tr-TR';
+      speechRecognition.continuous = true;
+      speechRecognition.interimResults = false;
+      speechRecognition.start();
+
+      speechRecognition.onresult = (event) => {
+        const last = event.results.length - 1;
+        const command = event.results[last][0].transcript.trim().toLowerCase();
+        console.log('Sesli Komut:', command);
+
+        // Komutlar:
+        if (command.includes('sonraki')) nextChannel();
+        else if (command.includes('önceki')) prevChannel();
+        else if (command.match(/kanal\s*(\d+)/)) {
+          const num = command.match(/kanal\s*(\d+)/)[1];
+          if (num >= 1 && num <= channels.length) startChannel(num - 1);
+        }
+        else if (command.includes('duraklat') || command.includes('pause')) {
+          videoEl.pause();
+        }
+        else if (command.includes('oynat') || command.includes('play')) {
+          videoEl.play();
+        }
+        else if (command.includes('youtube')) {
+          // YouTube kanalı varsa aç (ilk bulunan)
+          const yt = channels.find(c => c.type === 'youtube');
+          if (yt) startChannel(channels.indexOf(yt));
+        }
+      };
+
+      speechRecognition.onerror = (e) => {
+        console.log('Sesli komut hatası:', e.error);
+      };
+
+      speechRecognition.onend = () => {
+        speechRecognition.start(); // kesilmesin diye tekrar başlat
+      };
+    }
+
+    // Playlist Yükleme (M3U veya basit metin dosyası)
+    loadPlaylistBtn.onclick = () => {
+      fileInput.click();
+    };
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        parsePlaylist(reader.result);
+      };
+      reader.readAsText(file);
+    };
+
+    function parsePlaylist(text) {
+      // Basit M3U Parser: #EXTINF ve URL ayrımı
+      const lines = text.split(/\r?\n/);
+      const newChannels = [];
+      let currentName = '', currentUrl = '', currentSecured = false, currentPassword = '', currentSubtitle = '', currentType = 'hls', currentCategory = 'TV';
+
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('#EXTINF')) {
+          // Örnek: #EXTINF:-1 tvg-logo="url" tvg-name="TRT 1",TRT 1
+          const matchName = line.match(/,(.*)$/);
+          currentName = matchName ? matchName[1] : 'Bilinmeyen';
+          // Özel taglar için genişletilebilir
+        } else if (line && !line.startsWith('#')) {
+          currentUrl = line;
+          // Basit url türü kontrolü
+          if (currentUrl.includes('youtube.com') || currentUrl.includes('youtu.be')) currentType = 'youtube';
+          else if (currentUrl.endsWith('.mp3')) currentType = 'audio';
+          else if (currentUrl.endsWith('.m3u8') || currentUrl.endsWith('.m3u')) currentType = 'hls';
+          else currentType = 'video';
+
+          newChannels.push({
+            id: channels.length + newChannels.length + 1,
+            name: currentName,
+            url: currentUrl,
+            subtitle: current
+<!-- Önceki kodun devamı -->
+
+          subtitle: currentSubtitle || '',
+          secured: currentSecured || false,
+          password: currentPassword || '',
+          type: currentType,
+          category: currentCategory
+          });
+          // Reset temp değişkenler
+          currentName = '';
+          currentUrl = '';
+          currentSecured = false;
+          currentPassword = '';
+          currentSubtitle = '';
+          currentType = 'hls';
+          currentCategory = 'TV';
+        }
+      }
+
+      if (newChannels.length > 0) {
+        channels = newChannels;
+        currentChannelIndex = 0;
+        renderPlaylist();
+        alert(`${newChannels.length} kanal yüklendi!`);
+        startChannel(0);
+      } else {
+        alert('Geçerli kanal bulunamadı!');
+      }
+    }
+
+    // Playlist Düzenleme (Basit prompt ile JSON editörü)
+    editPlaylistBtn.onclick = () => {
+      const json = JSON.stringify(channels, null, 2);
+      const edited = prompt('Kanal listesi JSON formatında:', json);
+      if (!edited) return;
+      try {
+        const parsed = JSON.parse(edited);
+        if (Array.isArray(parsed)) {
+          channels = parsed;
+          currentChannelIndex = 0;
+          renderPlaylist();
+          startChannel(0);
+        } else {
+          alert('Geçersiz format!');
+        }
+      } catch (e) {
+        alert('JSON hatası: ' + e.message);
+      }
+    };
+
+    // Playlist Silme (Tüm listeyi temizle)
+    deletePlaylistBtn.onclick = () => {
+      if (confirm('Tüm kanal listesi silinecek, emin misiniz?')) {
+        channels = [];
+        currentChannelIndex = 0;
+        renderPlaylist();
+        videoEl.pause();
+        videoEl.src = '';
+        ytPlayer.src = '';
+        statusEl.textContent = 'Offline';
+      }
+    };
+
+    // İlk başlatma
+    renderPlaylist();
+    startChannel(currentChannelIndex);
+
+    // Sesli komutları başlat
+    setupSpeechRecognition();
+
+  </script>
+</body>
+</html>
