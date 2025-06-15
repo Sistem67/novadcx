@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIV1PRO+ | AI Destekli Profesyonel IPTV Player</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --light-bg: #2d2d2d;
+            --border-color: #444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            padding: 15px;
+            overflow-y: auto;
+            height: 100vh;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .sidebar-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sidebar h2 {
+            color: var(--text-color);
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar h2 i {
+            margin-right: 10px;
+        }
+        
+        .channel-list {
+            list-style: none;
+        }
+        
+        .channel-list li {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .channel-list li:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .channel-list li.active {
+            background-color: var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        .channel-list li i {
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .category {
+            margin-bottom: 20px;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .player-header {
+            background-color: var(--primary-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .player-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-right: 20px;
+        }
+        
+        .status-info {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .status-item i {
+            margin-right: 5px;
+        }
+        
+        .online {
+            color: #2ecc71;
+        }
+        
+        .offline {
+            color: var(--accent-color);
+        }
+        
+        /* Player Container */
+        .player-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            position: relative;
+        }
+        
+        .video-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            position: relative;
+        }
+        
+        #iptv-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .brand-watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        /* Player Controls */
+        .player-controls {
+            background-color: var(--primary-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--secondary-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn i {
+            margin-right: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+            
+            .main-content {
+                height: auto;
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+            z-index: 5;
+        }
+        
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        /* Voice Control Indicator */
+        .voice-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+            display: none;
+        }
+        
+        .voice-control.active {
+            display: flex;
+        }
+        
+        .voice-icon {
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar with Channel List -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-bars"></i> Kanal Kategorileri</h2>
+        </div>
+        
+        <div class="category">
+            <h2><i class="fas fa-tv"></i> TV Kanalları</h2>
+            <ul class="channel-list" id="tv-channels">
+                <!-- TV channels will be loaded here -->
+            </ul>
+        </div>
+        
+        <div class="category">
+            <h2><i class="fas fa-radio"></i> Radyo Kanalları</h2>
+            <ul class="channel-list" id="radio-channels">
+                <!-- Radio channels will be loaded here -->
+            </ul>
+        </div>
+        
+        <div class="category">
+            <h2><i class="fas fa-music"></i> Müzik Kanalları</h2>
+            <ul class="channel-list" id="music-channels">
+                <!-- Music channels will be loaded here -->
+            </ul>
+        </div>
+        
+        <div class="category">
+            <h2><i class="fas fa-film"></i> Film Kanalları</h2>
+            <ul class="channel-list" id="movie-channels">
+                <!-- Movie channels will be loaded here -->
+            </ul>
+        </div>
+        
+        <div class="category">
+            <h2><i class="fas fa-star"></i> Favorilerim</h2>
+            <ul class="channel-list" id="favorite-channels">
+                <!-- Favorite channels will be loaded here -->
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Player Header -->
+        <div class="player-header">
+            <div class="player-info">
+                <div class="player-title">MIV1PRO+</div>
+            </div>
+            <div class="status-info">
+                <div class="status-item" id="current-date">
+                    <i class="far fa-calendar-alt"></i>
+                    <span id="date-display"></span>
+                </div>
+                <div class="status-item" id="current-time">
+                    <i class="far fa-clock"></i>
+                    <span id="time-display"></span>
+                </div>
+                <div class="status-item" id="current-day">
+                    <i class="far fa-calendar-check"></i>
+                    <span id="day-display"></span>
+                </div>
+                <div class="status-item" id="connection-status">
+                    <i class="fas fa-circle"></i>
+                    <span>Online</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Player Container -->
+        <div class="player-container">
+            <div class="video-wrapper">
+                <div class="spinner" id="loading-spinner"></div>
+                <video id="iptv-player" controls></video>
+                <div class="brand-watermark">MIV1PRO</div>
+                <div class="voice-control" id="voice-control">
+                    <div class="voice-icon"></div>
+                    <span>Sesli komut dinleniyor...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Player Controls -->
+        <div class="player-controls">
+            <div class="control-group">
+                <button class="btn" id="load-playlist-btn">
+                    <i class="fas fa-folder-open"></i> Playlist Yükle
+                </button>
+                <button class="btn" id="edit-playlist-btn">
+                    <i class="fas fa-edit"></i> Playlist Düzenle
+                </button>
+                <button class="btn btn-danger" id="delete-playlist-btn">
+                    <i class="fas fa-trash"></i> Playlist Sil
+                </button>
+                <button class="btn" id="password-btn">
+                    <i class="fas fa-lock"></i> Şifre
+                </button>
+            </div>
+            <div class="control-group">
+                <button class="btn" id="voice-control-btn">
+                    <i class="fas fa-microphone"></i> Sesli Komut
+                </button>
+                <button class="btn" id="add-channel-btn">
+                    <i class="fas fa-plus"></i> Kanal Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Load Playlist Modal -->
+    <div class="modal" id="load-playlist-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Playlist Yükle</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="playlist-url">M3U Playlist URL</label>
+                <input type="text" id="playlist-url" class="form-control" placeholder="https://example.com/playlist.m3u">
+            </div>
+            <div class="form-group">
+                <label for="local-playlist">Veya Yerel Dosya Seç</label>
+                <input type="file" id="local-playlist" class="form-control" accept=".m3u,.m3u8">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-load">İptal</button>
+                <button class="btn" id="confirm-load">Yükle</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Playlist Modal -->
+    <div class="modal" id="edit-playlist-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Playlist Düzenle</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="edit-playlist-name">Playlist Adı</label>
+                <input type="text" id="edit-playlist-name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="edit-playlist-content">Playlist İçeriği</label>
+                <textarea id="edit-playlist-content" class="form-control" rows="10"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-edit">İptal</button>
+                <button class="btn" id="save-edit">Kaydet</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Password Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Şifre Ayarları</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="current-password">Mevcut Şifre</label>
+                <input type="password" id="current-password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="new-password">Yeni Şifre</label>
+                <input type="password" id="new-password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Yeni Şifre (Tekrar)</label>
+                <input type="password" id="confirm-password" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-password">İptal</button>
+                <button class="btn" id="save-password">Kaydet</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Channel Modal -->
+    <div class="modal" id="add-channel-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Kanal Ekle</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="channel-name">Kanal Adı</label>
+                <input type="text" id="channel-name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="channel-url">Kanal URL</label>
+                <input type="text" id="channel-url" class="form-control" placeholder="http://example.com/stream.m3u8">
+            </div>
+            <div class="form-group">
+                <label for="channel-category">Kategori</label>
+                <select id="channel-category" class="form-control">
+                    <option value="tv">TV</option>
+                    <option value="radio">Radyo</option>
+                    <option value="music">Müzik</option>
+                    <option value="movie">Film</option>
+                    <option value="favorite">Favori</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-add-channel">İptal</button>
+                <button class="btn" id="save-channel">Kaydet</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const player = document.getElementById('iptv-player');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const voiceControlBtn = document.getElementById('voice-control-btn');
+            const voiceControlIndicator = document.getElementById('voice-control');
+            const dateDisplay = document.getElementById('date-display');
+            const timeDisplay = document.getElementById('time-display');
+            const dayDisplay = document.getElementById('day-display');
+            
+            // Modal Elements
+            const modals = document.querySelectorAll('.modal');
+            const modalBtns = document.querySelectorAll('[data-modal]');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+            
+            // Sample data for channels (in a real app, this would come from an M3U file)
+            const sampleChannels = {
+                tv: [
+                    { name: "TRT 1", url: "http://example.com/trt1.m3u8", logo: "https://i.imgur.com/abc123.png" },
+                    { name: "Show TV", url: "http://example.com/showtv.m3u8", logo: "https://i.imgur.com/def456.png" },
+                    { name: "Kanal D", url: "http://example.com/kanald.m3u8", logo: "https://i.imgur.com/ghi789.png" },
+                    { name: "Star TV", url: "http://example.com/startv.m3u8", logo: "https://i.imgur.com/jkl012.png" },
+                    { name: "FOX", url: "http://example.com/fox.m3u8", logo: "https://i.imgur.com/mno345.png" }
+                ],
+                radio: [
+                    { name: "TRT FM", url: "http://example.com/trtfm.mp3", logo: "https://i.imgur.com/pqr678.png" },
+                    { name: "Power FM", url: "http://example.com/powerfm.mp3", logo: "https://i.imgur.com/stu901.png" }
+                ],
+                music: [
+                    { name: "Pop Müzik", url: "http://example.com/pop.m3u8", logo: "https://i.imgur.com/vwx234.png" },
+                    { name: "Rock Müzik", url: "http://example.com/rock.m3u8", logo: "https://i.imgur.com/yzA567.png" }
+                ],
+                movie: [
+                    { name: "Aksiyon Filmleri", url: "http://example.com/action.m3u8", logo: "https://i.imgur.com/bcd890.png" },
+                    { name: "Komedi Filmleri", url: "http://example.com/comedy.m3u8", logo: "https://i.imgur.com/efg123.png" }
+                ],
+                favorite: []
+            };
+            
+            // Initialize the app
+            initApp();
+            
+            function initApp() {
+                // Load sample channels
+                loadChannels();
+                
+                // Update date and time
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+                
+                // Setup modal functionality
+                setupModals();
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+                // Check connection status
+                checkConnection();
+            }
+            
+            function loadChannels() {
+                // Load TV channels
+                const tvList = document.getElementById('tv-channels');
+                sampleChannels.tv.forEach(channel => {
+                    tvList.appendChild(createChannelItem(channel));
+                });
+                
+                // Load Radio channels
+                const radioList = document.getElementById('radio-channels');
+                sampleChannels.radio.forEach(channel => {
+                    radioList.appendChild(createChannelItem(channel));
+                });
+                
+                // Load Music channels
+                const musicList = document.getElementById('music-channels');
+                sampleChannels.music.forEach(channel => {
+                    musicList.appendChild(createChannelItem(channel));
+                });
+                
+                // Load Movie channels
+                const movieList = document.getElementById('movie-channels');
+                sampleChannels.movie.forEach(channel => {
+                    movieList.appendChild(createChannelItem(channel));
+                });
+                
+                // Load Favorite channels
+                const favoriteList = document.getElementById('favorite-channels');
+                sampleChannels.favorite.forEach(channel => {
+                    favoriteList.appendChild(createChannelItem(channel));
+                });
+            }
+            
+            function createChannelItem(channel) {
+                const li = document.createElement('li');
+                li.textContent = channel.name;
+                li.setAttribute('data-url', channel.url);
+                
+                li.addEventListener('click', function() {
+                    // Remove active class from all channels
+                    document.querySelectorAll('.channel-list li').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked channel
+                    li.classList.add('active');
+                    
+                    // Play the channel
+                    playChannel(channel.url);
+                });
+                
+                return li;
+            }
+            
+            function playChannel(url) {
+                showLoading();
+                
+                // Try to play the stream
+                player.src = url;
+                player.load();
+                
+                player.play().then(() => {
+                    hideLoading();
+                }).catch(error => {
+                    console.error('Playback failed:', error);
+                    hideLoading();
+                    // Auto-skip to next channel after 5 seconds if playback fails
+                    setTimeout(autoSkipChannel, 5000);
+                });
+            }
+            
+            function autoSkipChannel() {
+                // Find currently playing channel
+                const currentChannel = document.querySelector('.channel-list li.active');
+                
+                if (currentChannel) {
+                    // Find next channel in the same category
+                    const parentList = currentChannel.parentNode;
+                    const nextChannel = currentChannel.nextElementSibling || parentList.firstElementChild;
+                    
+                    if (nextChannel) {
+                        nextChannel.click();
+                    }
+                }
+            }
+            
+            function showLoading() {
+                loadingSpinner.style.display = 'block';
+                player.style.display = 'none';
+            }
+            
+            function hideLoading() {
+                loadingSpinner.style.display = 'none';
+                player.style.display = 'block';
+            }
+            
+            function updateDateTime() {
+                const now = new Date();
+                
+                // Format date (DD.MM.YYYY)
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                dateDisplay.textContent = `${day}.${month}.${year}`;
+                
+                // Format time (HH:MM:SS)
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+                
+                // Format day name
+                const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                dayDisplay.textContent = days[now.getDay()];
+            }
+            
+            function checkConnection() {
+                // Simulate connection check
+                const connectionStatus = document.getElementById('connection-status');
+                
+                // In a real app, you would check actual network connectivity
+                const isOnline = navigator.onLine;
+                
+                if (isOnline) {
+                    connectionStatus.querySelector('i').className = 'fas fa-circle online';
+                    connectionStatus.querySelector('span').textContent = 'Online';
+                } else {
+                    connectionStatus.querySelector('i').className = 'fas fa-circle offline';
+                    connectionStatus.querySelector('span').textContent = 'Offline';
+                }
+            }
+            
+            function setupModals() {
+                // Show modal when button is clicked
+                document.getElementById('load-playlist-btn').addEventListener('click', () => {
+                    document.getElementById('load-playlist-modal').style.display = 'flex';
+                });
+                
+                document.getElementById('edit-playlist-btn').addEventListener('click', () => {
+                    document.getElementById('edit-playlist-modal').style.display = 'flex';
+                });
+                
+                document.getElementById('password-btn').addEventListener('click', () => {
+                    document.getElementById('password-modal').style.display = 'flex';
+                });
+                
+                document.getElementById('add-channel-btn').addEventListener('click', () => {
+                    document.getElementById('add-channel-modal').style.display = 'flex';
+                });
+                
+                // Hide modal when close button is clicked
+                closeModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.closest('.modal').style.display = 'none';
+                    });
+                });
+                
+                // Hide modal when clicking outside
+                modals.forEach(modal => {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            this.style.display = 'none';
+                        }
+                    });
+                });
+                
+                // Cancel buttons
+                document.getElementById('cancel-load').addEventListener('click', () => {
+                    document.getElementById('load-playlist-modal').style.display = 'none';
+                });
+                
+                document.getElementById('cancel-edit').addEventListener('click', () => {
+                    document.getElementById('edit-playlist-modal').style.display = 'none';
+                });
+                
+                document.getElementById('cancel-password').addEventListener('click', () => {
+                    document.getElementById('password-modal').style.display = 'none';
+                });
+                
+                document.getElementById('cancel-add-channel').addEventListener('click', () => {
+                    document.getElementById('add-channel-modal').style.display = 'none';
+                });
+                
+                // Save/Confirm buttons
+                document.getElementById('confirm-load').addEventListener('click', loadPlaylist);
+                document.getElementById('save-edit').addEventListener('click', savePlaylist);
+                document.getElementById('save-password').addEventListener('click', savePassword);
+                document.getElementById('save-channel').addEventListener('click', addChannel);
+            }
+            
+            function setupEventListeners() {
+                // Voice control button
+                voiceControlBtn.addEventListener('click', toggleVoiceControl);
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    // Space to play/pause
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        if (player.paused) {
+                            player.play();
+                        } else {
+                            player.pause();
+                        }
+                    }
+                    
+                    // Arrow keys for channel navigation
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        navigateChannels(e.key);
+                    }
+                    
+                    // M to mute
+                    if (e.key === 'm' || e.key === 'M') {
+                        player.muted = !player.muted;
+                    }
+                    
+                    // F for fullscreen
+                    if (e.key === 'f' || e.key === 'F') {
+                        toggleFullscreen();
+                    }
+                });
+                
+                // Player events
+                player.addEventListener('error', function() {
+                    console.error('Player error:', player.error);
+                    autoSkipChannel();
+                });
+                
+                player.addEventListener('waiting', function() {
+                    showLoading();
+                });
+                
+                player.addEventListener('playing', function() {
+                    hideLoading();
+                });
+            }
+            
+            function toggleVoiceControl() {
+                if (voiceControlIndicator.classList.contains('active')) {
+                    // Stop voice recognition
+                    voiceControlIndicator.classList.remove('active');
+                    // In a real app, you would stop the speech recognition here
+                } else {
+                    // Start voice recognition
+                    voiceControlIndicator.classList.add('active');
+                    // In a real app, you would initialize speech recognition here
+                    // For example:
+                    // startSpeechRecognition();
+                }
+            }
+            
+            function navigateChannels(direction) {
+                const currentChannel = document.querySelector('.channel-list li.active');
+                
+                if (currentChannel) {
+                    const parentList = currentChannel.parentNode;
+                    let nextChannel;
+                    
+                    if (direction === 'ArrowUp') {
+                        nextChannel = currentChannel.previousElementSibling || parentList.lastElementChild;
+                    } else { // ArrowDown
+                        nextChannel = currentChannel.nextElementSibling || parentList.firstElementChild;
+                    }
+                    
+                    if (nextChannel) {
+                        nextChannel.click();
+                    }
+                }
+            }
+            
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    player.requestFullscreen().catch(err => {
+                        console.error('Fullscreen error:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            // Modal functions
+            function loadPlaylist() {
+                const url = document.getElementById('playlist-url').value;
+                const fileInput = document.getElementById('local-playlist');
+                
+                if (url) {
+                    // Load playlist from URL
+                    console.log('Loading playlist from URL:', url);
+                    // In a real app, you would fetch the playlist and parse it
+                    alert('Playlist URL yükleme işlemi simüle edildi: ' + url);
+                    document.getElementById('load-playlist-modal').style.display = 'none';
+                } else if (fileInput.files.length > 0) {
+                    // Load playlist from file
+                    const file = fileInput.files[0];
+                    console.log('Loading playlist from file:', file.name);
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Parse M3U file and load channels
+                        alert('Playlist dosyası yüklendi: ' + file.name);
+                        document.getElementById('load-playlist-modal').style.display = 'none';
+                    };
+                    reader.readAsText(file);
+                } else {
+                    alert('Lütfen bir playlist URL\'si girin veya dosya seçin.');
+                }
+            }
+            
+            function savePlaylist() {
+                const name = document.getElementById('edit-playlist-name').value;
+                const content = document.getElementById('edit-playlist-content').value;
+                
+                if (name && content) {
+                    console.log('Saving playlist:', name);
+                    alert('Playlist kaydedildi: ' + name);
+                    document.getElementById('edit-playlist-modal').style.display = 'none';
+                } else {
+                    alert('Lütfen playlist adı ve içeriği girin.');
+                }
+            }
+            
+            function savePassword() {
+                const currentPass = document.getElementById('current-password').value;
+                const newPass = document.getElementById('new-password').value;
+                const confirmPass = document.getElementById('confirm-password').value;
+                
+                if (!currentPass || !newPass || !confirmPass) {
+                    alert('Lütfen tüm alanları doldurun.');
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    alert('Yeni şifreler eşleşmiyor.');
+                    return;
+                }
+                
+                // In a real app, you would validate current password and save the new one
+                console.log('Password changed');
+                alert('Şifre başarıyla değiştirildi.');
+                document.getElementById('password-modal').style.display = 'none';
+            }
+            
+            function addChannel() {
+                const name = document.getElementById('channel-name').value;
+                const url = document.getElementById('channel-url').value;
+                const category = document.getElementById('channel-category').value;
+                
+                if (!name || !url) {
+                    alert('Lütfen kanal adı ve URL\'si girin.');
+                    return;
+                }
+                
+                const newChannel = { name, url };
+                
+                // Add to sample data
+                sampleChannels[category].push(newChannel);
+                
+                // Add to UI
+                const list = document.getElementById(`${category}-channels`);
+                list.appendChild(createChannelItem(newChannel));
+                
+                alert('Kanal eklendi: ' + name);
+                document.getElementById('add-channel-modal').style.display = 'none';
+                
+                // Clear form
+                document.getElementById('channel-name').value = '';
+                document.getElementById('channel-url').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
