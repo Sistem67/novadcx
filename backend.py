@@ -17,7 +17,7 @@ clients = set()
 def load_model(language_code):
     model_paths = {
         'en': 'vosk-model-small-en-us-0.15',
-        'tr': 'vosk-model-small-tr-0.22'
+        'tr': 'vosk-model-small-tr-0.3'
     }
     path = model_paths.get(language_code, model_paths['en'])
     if not os.path.exists(path):
