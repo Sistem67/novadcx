@@ -15,7 +15,7 @@ import re
 # Ayarlar
 SAMPLE_RATE = 16000
 CHUNK_SIZE = 4000
-VOSK_MODEL_PATH = "/root/vosk-model-small-en-us-0.15"
+VOSK_MODEL_PATH = "/root/vosk-model-small-tr-0.3"
 FASTTEXT_MODEL_PATH = "/root/cc.tr.300.bin"
 
 # Yükleme kontrolleri
