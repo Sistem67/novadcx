@@ -16,7 +16,7 @@ import re
 SAMPLE_RATE = 16000
 CHUNK_SIZE = 4000
 VOSK_MODEL_PATH = "/root/vosk-model-small-en-us-0.15"
-FASTTEXT_MODEL_PATH = "/root/lid.176.bin"
+FASTTEXT_MODEL_PATH = "/root/cc.tr.300.bin"
 
 # Yükleme kontrolleri
 assert os.path.exists(VOSK_MODEL_PATH), "Vosk modeli eksik!"
