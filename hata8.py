@@ -9,8 +9,8 @@ from TTS.utils.synthesizer import Synthesizer
 vosk_model_path = "/root/vosk-model-small-tr-0.3"
 
 # Coqui TTS model yolları
-tts_config_path = "/root/abdc/ttsmodels/config.yaml"
-tts_model_path = "/root/abdc/ttsmodels/tr_model.onnx"
+tts_config_path = "/abdc/ttsmodels/config.yaml"
+tts_model_path = "/abdc/ttsmodels/tr_model.onnx"
 
 # VOSK model yükle
 model = Model(vosk_model_path)
@@ -33,7 +33,7 @@ synthesizer = Synthesizer(
 
 # Yayın URL kontrol
 if len(sys.argv) < 2:
-    print("Kullanım: python3 hata7.py <m3u8_link>")
+    print("Kullanım: python3 hata8.py <m3u8_link>")
     sys.exit(1)
 
 url = sys.argv[1]
