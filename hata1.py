@@ -6,7 +6,7 @@ from vosk import Model, KaldiRecognizer
 from TTS.utils.synthesizer import Synthesizer
 
 # VOSK model yolu
-vosk_model_path = "/root/vosk-model-small-multilingual-0.3"
+vosk_model_path = "/root/vosk-model-small-tr-0.3"
 
 # Coqui TTS model yolları
 tts_config_path = "/root/.local/share/tts/tts_models--tr--mai--medium/config.yaml"
