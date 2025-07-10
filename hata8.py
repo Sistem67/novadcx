@@ -9,8 +9,8 @@ from TTS.utils.synthesizer import Synthesizer
 vosk_model_path = "/root/vosk-model-small-tr-0.3"
 
 # Coqui TTS model yolları
-tts_config_path = "/abdc/ttsmodels/config.yaml"
-tts_model_path = "/abdc/ttsmodels/tr_model.onnx"
+tts_config_path = "/root/ttsmodels/config.yaml"
+tts_model_path = "/root/ttsmodels/tr_model.onnx"
 
 # VOSK model yükle
 model = Model(vosk_model_path)
