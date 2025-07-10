@@ -33,7 +33,7 @@ synthesizer = Synthesizer(
 
 # Yayın URL kontrol
 if len(sys.argv) < 2:
-    print("Kullanım: python3 backend.py <m3u8_link>")
+    print("Kullanım: python3 hata2.py <m3u8_link>")
     sys.exit(1)
 
 url = sys.argv[1]
