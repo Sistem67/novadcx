@@ -34,7 +34,7 @@ recognizer = KaldiRecognizer(vosk_model, 16000)
 # Piper TTS modeli (CPU)
 device = "cpu"
 piper_model = infer.PiperInfer(
-    voice_path=/path/to/models/,  # default kadın sesi
+    voice_path=/path/to/models/tr_Tr-fahrettin-medium.onnx,  
     device=device,
 )
 
