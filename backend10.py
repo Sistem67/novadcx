@@ -32,10 +32,11 @@ vosk_model = Model(VOSK_MODEL_PATH)
 recognizer = KaldiRecognizer(vosk_model, 16000)
 
 # Piper TTS modeli (CPU)
-device = "cpu"
-piper_model = infer.PiperInfer(
-    voice_path="/root/xdcx/tr_Tr-fahrettin-medium.onnx",  
-    device=device,
+from piper import PiperVoice
+voice = PiperVoice.load(
+    model_path="/xdcx/models/tr_TR-fahrettin-medium.onnx",
+    config_path="/xdcx/models/tr_TR-fahrettin-medium.onnx.json",
+    use_cuda=False
 )
 
 # FastAPI uygulaması ve websocket bağlantıları
