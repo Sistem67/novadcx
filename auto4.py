@@ -40,7 +40,7 @@ GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
 LANGUAGE_DETECTION_THRESHOLD = 0.75  # Düşürüldü
 
 # Model yolları
-VOSK_MODEL_PATH = "/root/vosk-model-en-us-0.22-lgraph"  # Daha hızlı model
+VOSK_MODEL_PATH = "/root/vosk-model-en-us-0.22"  # Daha hızlı model
 FASTTEXT_MODEL_PATH = "/root/lid.176.bin"
 
 # Önbellek boyutları
