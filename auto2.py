@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Ayarlar
 SAMPLE_RATE = 16000
 CHUNK_SIZE = 4000
-VOSK_MODEL_PATH = "/root/vosk-model-spk-0.4"  # Güncellenmiş çoklu dil modeli
+VOSK_MODEL_PATH = "/root/vosk-model-en-us-0.22"  # Güncellenmiş çoklu dil modeli
 FASTTEXT_MODEL_PATH = "/root/lid.176.bin"
 MAX_BUFFER_LENGTH = 70  # Maksimum karakter uzunluğu
 MIN_BUFFER_LENGTH = 20  # Minimum çeviri yapılacak uzunluk
