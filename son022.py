@@ -41,7 +41,7 @@ MIN_WORDS = 4
 MAX_WORDS = 14
 
 # Model yolları
-VOSK_MODEL_DIR = "/root/vosk-models"
+VOSK_MODEL_DIR = "/root/"
 ACTIVE_MODEL = "vosk-model-en-us-0.22"  # Varsayılan İngilizce model
 FASTTEXT_MODEL_PATH = "/root/lid.176.bin"
 
