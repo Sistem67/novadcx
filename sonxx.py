@@ -42,7 +42,7 @@ MAX_WORDS = 12
 
 # Model yolları (KULLANICI TANIMLI)
 VOSK_MODEL_DIR = "/root/"  # Tüm modellerin bulunduğu dizin
-DEFAULT_MODEL = "vosk-model-en-us-0.22"  # Varsayılan model
+DEFAULT_MODEL = "vosk-model-spk-0.4"  # Varsayılan model
 FASTTEXT_MODEL_PATH = "/root/lid.176.bin"
 
 # Global nesneler
