@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canlı Yayın Altyazılı Çeviri</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    #subtitle {
+      position: absolute;
+      bottom: 15%;
+      width: 100%;
+      text-align: center;
+      font-size: 1.6em;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px;
+      display: none;
+    }
+    #controls {
+      position: absolute;
+      bottom: 5%;
+      width: 100%;
+      text-align: center;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid white;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      font-size: 1em;
+      border-radius: 4px;
+    }
+    .info {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <video id="player" controls autoplay muted>
+    <source id="streamSource" src="" type="application/x-mpegURL">
+    Tarayıcınız HTML5 video desteklemiyor.
+  </video>
+
+  <div class="info">
+    <div>Yayın: <span id="streamInfo">Yükleniyor...</span></div>
+  </div>
+
+  <div id="subtitle"></div>
+
+  <div id="controls">
+    <button class="btn" onclick="toggleSubtitles()">Altyazı Göster</button>
+    <button class="btn" onclick="toggleVoice()">Sesli Çeviri Aç</button>
+  </div>
+
+  <script>
+    const subtitleBox = document.getElementById("subtitle");
+    const streamInfo = document.getElementById("streamInfo");
+    const player = document.getElementById("player");
+    const streamSource = document.getElementById("streamSource");
+
+    let showSubtitles = false;
+    let voiceEnabled = false;
+
+    // Backend'den yayın URL'sini otomatik al
+    fetch("http://" + location.hostname + ":8500/stream-url")
+      .then(res => res.json())
+      .then(data => {
+        const streamURL = data.url;
+        streamSource.src = streamURL;
+        player.load();
+        streamInfo.textContent = streamURL;
+      });
+
+    // WebSocket bağlantısı
+    const socket = new WebSocket("ws://" + location.hostname + ":8000");
+
+    socket.onmessage = async function(event) {
+      try {
+        const data = JSON.parse(event.data);
+        const text = data.text;
+        const audioB64 = data.audio;
+
+        if (showSubtitles) {
+          subtitleBox.style.display = "block";
+          subtitleBox.textContent = text;
+        } else {
+          subtitleBox.style.display = "none";
+        }
+
+        if (voiceEnabled && audioB64) {
+          const audioBlob = b64ToBlob(audioB64, 'audio/mp3');
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+          player.volume = 0.05;
+        } else {
+          player.volume = 1.0;
+        }
+      } catch (e) {
+        console.error("Veri işlenemedi:", e);
+      }
+    };
+
+    function toggleSubtitles() {
+      showSubtitles = !showSubtitles;
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+    }
+
+    function b64ToBlob(base64, type = 'application/octet-stream') {
+      const binary = atob(base64);
+      const len = binary.length;
+      const buffer = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        buffer[i] = binary.charCodeAt(i);
+      }
+      return new Blob([buffer], { type });
+    }
+  </script>
+</body>
+</html>
