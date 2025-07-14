@@ -29,8 +29,8 @@ MIN_WORDS = 4
 MAX_WORDS = 14
 
 # Model yolları (DÜZENLENEBİLİR)
-MODEL_BASE_DIR = "/"  # Tüm modellerin bulunduğu ana dizin
-DEFAULT_MODEL = "vosk-model-en-us-0.22"  # Varsayılan model
+MODEL_BASE_DIR = "/root/"  # Tüm modellerin bulunduğu ana dizin
+DEFAULT_MODEL = "vosk-model-small-en-us-0.15"  # Varsayılan model
 FASTTEXT_MODEL = "lid.176.bin"
 
 # -------------------- MODEL YÜKLEME --------------------
