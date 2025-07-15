@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>zeroX Player</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a0a12;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 800px;
+      background: #1a1a24;
+      border: 4px solid #00ff9d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+      overflow: hidden;
+    }
+
+    .brand-stripe {
+      height: 50px;
+      background: linear-gradient(90deg, #000, #008a4f, #000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px #00ff9d;
+    }
+
+    .media-display {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    video {
+      width: 100%;
+      max-height: 400px;
+      background: black;
+    }
+
+    .vu-meters {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: #111;
+    }
+
+    .vu-leds {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+      max-width: 360px;
+      height: 10px;
+      justify-content: flex-start;
+      align-items: center;
+      background: #000;
+      padding: 3px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .vu-led {
+      width: 6px;
+      height: 100%;
+      background: #333;
+      border-radius: 2px;
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+
+    .slider-section {
+      background: #2a2a3a;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+      min-width: 100px;
+    }
+
+    .led-bar {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .led {
+      width: 6px;
+      height: 6px;
+      background: #333;
+      border-radius: 50%;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .slider {
+      width: 100%;
+    }
+
+    .slider-label {
+      color: #ccc;
+      font-size: 11px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .transport-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: #15151e;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: #2a2a3a;
+      border: 1px solid #333;
+      color: #00ff9d;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .play-btn {
+      background: linear-gradient(#00aa77, #007a43);
+      color: black;
+    }
+
+    .url-loader {
+      display: flex;
+      padding: 15px;
+      background: #111;
+      border-top: 1px solid #333;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #00ff9d;
+      box-shadow: 0 0 5px #00ff9d;
+    }
+
+    .load-btn {
+      padding: 10px 15px;
+      margin-left: 10px;
+      background: #008a4f;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .load-btn:hover {
+      background: #00ff9d;
+      color: black;
+    }
+
+    /* YouTube Search Section */
+    .youtube-search {
+      padding: 15px;
+      background: #15151e;
+      border-top: 1px solid #333;
+    }
+
+    .search-container {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .search-btn {
+      padding: 10px 15px;
+      margin-left: 10px;
+      background: #008a4f;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .search-btn:hover {
+      background: #00ff9d;
+      color: black;
+    }
+
+    .results-container {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #111;
+      border-radius: 4px;
+      padding: 5px;
+    }
+
+    .result-item {
+      padding: 8px;
+      margin-bottom: 5px;
+      background: #222;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .result-item:hover {
+      background: #2a2a3a;
+    }
+
+    .result-title {
+      color: #00ff9d;
+      font-size: 12px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-channel {
+      color: #aaa;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="brand-stripe">zeroX Player</div>
+
+    <div class="media-display">
+      <video id="video" controls crossorigin="anonymous"></video>
+    </div>
+
+    <div class="vu-meters">
+      <div class="vu-leds" id="vuLeftLeds"></div>
+      <div class="vu-leds" id="vuRightLeds"></div>
+    </div>
+
+    <div class="slider-section">
+      <div class="slider-container">
+        <div class="led-bar" id="ledBass"></div>
+        <input type="range" class="slider" id="bassSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Bass</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledTreble"></div>
+        <input type="range" class="slider" id="trebleSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Treble</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledVolume"></div>
+        <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70"/>
+        <div class="slider-label">Volume</div>
+      </div>
+    </div>
+
+    <div class="transport-controls">
+      <button class="control-btn">⏮</button>
+      <button class="control-btn">⏪</button>
+      <button class="control-btn play-btn" id="playBtn">▶</button>
+      <button class="control-btn">⏩</button>
+      <button class="control-btn">⏭</button>
+    </div>
+
+    <div class="url-loader">
+      <input type="text" id="mediaUrl" class="url-input" placeholder="Canlı yayın URL'si (.m3u8, .mp4, .mp3)...">
+      <button class="load-btn" id="loadBtn">Load</button>
+    </div>
+
+    <!-- YouTube Search Section -->
+    <div class="youtube-search">
+      <div class="search-container">
+        <input type="text" id="youtubeSearch" class="search-input" placeholder="YouTube'da video ara...">
+        <button class="search-btn" id="searchBtn">Search</button>
+      </div>
+      <div class="results-container" id="resultsContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const playBtn = document.getElementById("playBtn");
+    const vuLeftLeds = document.getElementById("vuLeftLeds");
+    const vuRightLeds = document.getElementById("vuRightLeds");
+    const searchBtn = document.getElementById("searchBtn");
+    const youtubeSearch = document.getElementById("youtubeSearch");
+    const resultsContainer = document.getElementById("resultsContainer");
+
+    let context, source, analyser, gainNode, bassFilter, trebleFilter;
+
+    const sliders = {
+      bass: document.getElementById("bassSlider"),
+      treble: document.getElementById("trebleSlider"),
+      volume: document.getElementById("volumeSlider"),
+    };
+
+    const leds = {
+      bass: document.getElementById("ledBass"),
+      treble: document.getElementById("ledTreble"),
+      volume: document.getElementById("ledVolume"),
+    };
+
+    function updateLeds(name) {
+      const container = leds[name];
+      container.innerHTML = "";
+      const value = parseInt(sliders[name].value);
+      const count = 10;
+      const active = Math.round((value / 100) * count);
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement("div");
+        led.className = "led";
+        if (i < active) {
+          const hue = 120 - (i * 120 / count);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        }
+        container.appendChild(led);
+      }
+    }
+
+    Object.keys(sliders).forEach((key) => {
+      sliders[key].addEventListener("input", () => {
+        updateLeds(key);
+        applyAudioSettings();
+      });
+      updateLeds(key);
+    });
+
+    function applyAudioSettings() {
+      if (!bassFilter || !trebleFilter || !gainNode) return;
+      bassFilter.gain.value = sliders.bass.value - 50;
+      trebleFilter.gain.value = sliders.treble.value - 50;
+      gainNode.gain.value = sliders.volume.value / 100;
+    }
+
+    function createVuLeds(container, count = 40) {
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement('div');
+        led.className = 'vu-led';
+        container.appendChild(led);
+      }
+    }
+
+    function updateVuLeds(container, level, max = 40) {
+      const leds = container.querySelectorAll('.vu-led');
+      const active = Math.round(level * max);
+      leds.forEach((led, i) => {
+        if (i < active) {
+          const hue = 120 - (i * 120 / max);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        } else {
+          led.style.background = '#222';
+          led.style.boxShadow = 'none';
+        }
+      });
+    }
+
+    function setupAudio() {
+      context = new (window.AudioContext || window.webkitAudioContext)();
+      source = context.createMediaElementSource(video);
+
+      bassFilter = context.createBiquadFilter();
+      bassFilter.type = "lowshelf";
+      bassFilter.frequency.value = 200;
+
+      trebleFilter = context.createBiquadFilter();
+      trebleFilter.type = "highshelf";
+      trebleFilter.frequency.value = 3000;
+
+      gainNode = context.createGain();
+
+      analyser = context.createAnalyser();
+      analyser.fftSize = 256;
+
+      source.connect(bassFilter);
+      bassFilter.connect(trebleFilter);
+      trebleFilter.connect(gainNode);
+      gainNode.connect(analyser);
+      analyser.connect(context.destination);
+
+      applyAudioSettings();
+      animateVU();
+    }
+
+    function animateVU() {
+      createVuLeds(vuLeftLeds);
+      createVuLeds(vuRightLeds);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      function draw() {
+        analyser.getByteFrequencyData(data);
+        const half = data.length / 2;
+        const leftAvg = data.slice(0, half).reduce((a, b) => a + b, 0) / half / 255;
+        const rightAvg = data.slice(half).reduce((a, b) => a + b, 0) / half / 255;
+
+        updateVuLeds(vuLeftLeds, leftAvg);
+        updateVuLeds(vuRightLeds, rightAvg);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (video.paused) {
+        video.play();
+        playBtn.textContent = "⏸";
+        if (!context) setupAudio();
+      } else {
+        video.pause();
+        playBtn.textContent = "▶";
+      }
+    });
+
+    document.getElementById("loadBtn").addEventListener("click", () => {
+      const url = document.getElementById("mediaUrl").value.trim();
+      if (url) {
+        video.src = url;
+        video.play();
+        playBtn.textContent = "⏸";
+        if (!context) setupAudio();
+      }
+    });
+
+    // YouTube Search Functionality
+    searchBtn.addEventListener("click", searchYouTube);
+    youtubeSearch.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") searchYouTube();
+    });
+
+    async function searchYouTube() {
+      const query = youtubeSearch.value.trim();
+      if (!query) return;
+
+      resultsContainer.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px;">Searching...</div>';
+
+      try {
+        // In a real implementation, you would use the YouTube API here
+        // For demonstration, we'll use a mock response
+        const mockResults = [
+          {
+            title: "How to Build a Music Player with JavaScript",
+            channel: "Web Dev Tutorials",
+            videoId: "dQw4w9WgXcQ"
+          },
+          {
+            title: "Advanced Audio Visualization Techniques",
+            channel: "Audio Coding",
+            videoId: "9bZkp7q19f0"
+          },
+          {
+            title: "HTML5 Video Player Customization",
+            channel: "Frontend Masters",
+            videoId: "JGwWNGJdvx8"
+          },
+          {
+            title: "Web Audio API Explained",
+            channel: "JavaScript Weekly",
+            videoId: "kJQP7kiw5Fk"
+          },
+          {
+            title: "Creating VU Meters with CSS and JS",
+            channel: "CSS Tricks",
+            videoId: "RgKAFK5djSk"
+          }
+        ];
+
+        displayResults(mockResults);
+      } catch (error) {
+        resultsContainer.innerHTML = '<div style="color: #ff5555; text-align: center; padding: 10px;">Error loading results</div>';
+        console.error("YouTube search error:", error);
+      }
+    }
+
+    function displayResults(results) {
+      resultsContainer.innerHTML = '';
+      
+      if (results.length === 0) {
+        resultsContainer.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px;">No results found</div>';
+        return;
+      }
+
+      results.forEach(result => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `
+          <div class="result-title">${result.title}</div>
+          <div class="result-channel">${result.channel}</div>
+        `;
+        item.addEventListener('click', () => {
+          playYouTubeVideo(result.videoId);
+        });
+        resultsContainer.appendChild(item);
+      });
+    }
+
+    function playYouTubeVideo(videoId) {
+      // In a real implementation, you would need to:
+      // 1. Use YouTube's iframe API or
+      // 2. Extract the direct video stream URL (which may violate YouTube's TOS)
+      
+      // For demonstration purposes, we'll just show a message
+      resultsContainer.innerHTML = `<div style="color: #00ff9d; text-align: center; padding: 10px;">Playing YouTube video: ${videoId}</div>`;
+      
+      // In a real app, you would do something like:
+      // video.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      // But this requires proper YouTube API integration
+    }
+  </script>
+</body>
+</html>
