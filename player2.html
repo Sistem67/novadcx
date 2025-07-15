@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VINTECH PRO | Retro-Fütüristik Player</title>
+    <style>
+        :root {
+            --neon-emerald: #00ff9d;
+            --neon-glow: 0 0 10px var(--neon-emerald), 0 0 20px var(--neon-emerald), 0 0 30px rgba(0, 255, 157, 0.5);
+            --dark: #0a0a12;
+            --metal: linear-gradient(145deg, #2a2a3a 0%, #1a1a24 100%);
+            --vintage-knob: radial-gradient(circle, #c0c0c0 0%, #808080 50%, #404040 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 420px;
+            border: 4px solid var(--neon-emerald);
+            border-radius: 8px;
+            box-shadow: var(--neon-glow);
+            background: var(--metal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Vintage Branding */
+        .brand-stripe {
+            height: 30px;
+            background: linear-gradient(90deg, #000000 0%, var(--neon-emerald) 50%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .brand-logo {
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 5px var(--neon-emerald);
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-logo::before {
+            content: "◆";
+            margin-right: 10px;
+            color: var(--neon-emerald);
+        }
+
+        .brand-logo::after {
+            content: "◆";
+            margin-left: 10px;
+            color: var(--neon-emerald);
+        }
+
+        /* Equalizer Section */
+        .equalizer-container {
+            height: 120px;
+            background: #000;
+            padding: 10px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            border-bottom: 2px solid #333;
+        }
+
+        .eq-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column-reverse;
+            height: 100%;
+        }
+
+        .eq-bar {
+            background: var(--neon-emerald);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s;
+            box-shadow: 0 0 5px var(--neon-emerald);
+        }
+
+        /* Player Controls */
+        .player-controls {
+            padding: 20px;
+            color: white;
+        }
+
+        .knob-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--vintage-knob);
+            border: 3px solid #444;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.8);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .knob::after {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 15px;
+            background: var(--neon-emerald);
+            box-shadow: 0 0 5px var(--neon-emerald);
+        }
+
+        .knob-label {
+            text-align: center;
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Transport Controls */
+        .transport-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #222;
+            border: 2px solid #444;
+            color: var(--neon-emerald);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .control-btn:hover {
+            background: #333;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px var(--neon-emerald);
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            background: linear-gradient(#333, #111);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--neon-emerald);
+            border-radius: 3px;
+            width: 0%;
+            box-shadow: 0 0 5px var(--neon-emerald);
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        /* URL Loader */
+        .url-loader {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 10px;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--neon-emerald);
+            box-shadow: 0 0 5px var(--neon-emerald);
+        }
+
+        .load-btn {
+            padding: 10px 15px;
+            background: #222;
+            border: 1px solid #333;
+            color: var(--neon-emerald);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .load-btn:hover {
+            background: var(--neon-emerald);
+            color: black;
+        }
+
+        /* Mode Switch */
+        .mode-switch {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .switch-label {
+            display: flex;
+            align-items: center;
+            color: #777;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            margin-left: 5px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #222;
+            transition: .4s;
+            border-radius: 20px;
+            border: 1px solid #444;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 1px;
+            background-color: #777;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--neon-emerald);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <!-- Branding Stripe -->
+        <div class="brand-stripe">
+            <div class="brand-logo">VINTECH PRO</div>
+        </div>
+
+        <!-- Mode Switch -->
+        <div class="mode-switch">
+            <label class="switch-label">
+                DARK
+                <div class="switch">
+                    <input type="checkbox" id="modeSwitch">
+                    <span class="slider"></span>
+                </div>
+                NEON
+            </label>
+        </div>
+
+        <!-- Equalizer Display -->
+        <div class="equalizer-container" id="equalizer">
+            <!-- 16-band equalizer -->
+            <div class="eq-column"><div class="eq-bar" style="height: 20%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 35%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 50%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 65%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 80%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 95%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 70%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 45%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 60%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 75%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 40%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 55%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 30%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 25%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 15%;"></div></div>
+            <div class="eq-column"><div class="eq-bar" style="height: 5%;"></div></div>
+        </div>
+
+        <!-- Player Controls -->
+        <div class="player-controls">
+            <!-- Knobs Section -->
+            <div class="knob-section">
+                <div>
+                    <div class="knob" id="bassKnob"></div>
+                    <div class="knob-label">BASS</div>
+                </div>
+                <div>
+                    <div class="knob" id="trebleKnob"></div>
+                    <div class="knob-label">TREBLE</div>
+                </div>
+                <div>
+                    <div class="knob" id="balanceKnob"></div>
+                    <div class="knob-label">BALANCE</div>
+                </div>
+                <div>
+                    <div class="knob" id="volumeKnob"></div>
+                    <div class="knob-label">VOLUME</div>
+                </div>
+            </div>
+
+            <!-- Transport Controls -->
+            <div class="transport-controls">
+                <button class="control-btn">⏮</button>
+                <button class="control-btn">⏪</button>
+                <button class="control-btn play-btn" id="playBtn">▶</button>
+                <button class="control-btn">⏩</button>
+                <button class="control-btn">⏭</button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">4:32</span>
+            </div>
+
+            <!-- URL Loader -->
+            <div class="url-loader">
+                <input type="text" class="url-input" placeholder="Enter media URL (MP3, MP4, YouTube...)">
+                <button class="load-btn">LOAD</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const playBtn = document.getElementById('playBtn');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const modeSwitch = document.getElementById('modeSwitch');
+            const eqBars = document.querySelectorAll('.eq-bar');
+            
+            // Player State
+            let isPlaying = false;
+            let currentTime = 0;
+            const duration = 272; // 4:32 in seconds
+            
+            // Knob Rotation Logic
+            const knobs = document.querySelectorAll('.knob');
+            knobs.forEach(knob => {
+                let isDragging = false;
+                let startY = 0;
+                let startRotation = 0;
+                
+                knob.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startY = e.clientY;
+                    startRotation = knob.dataset.rotation ? parseInt(knob.dataset.rotation) : 0;
+                    document.body.style.cursor = 'grabbing';
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaY = startY - e.clientY;
+                    const rotation = Math.min(Math.max(startRotation + deltaY, -120), 120);
+                    
+                    knob.style.transform = `rotate(${rotation}deg)`;
+                    knob.dataset.rotation = rotation;
+                    
+                    // Update equalizer visualization when adjusting knobs
+                    if (knob.id === 'bassKnob' || knob.id === 'trebleKnob') {
+                        updateEqualizer();
+                    }
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    document.body.style.cursor = '';
+                });
+            });
+            
+            // Equalizer Animation
+            function updateEqualizer() {
+                eqBars.forEach((bar, index) => {
+                    // Simulate different frequency responses
+                    let height;
+                    const bassValue = document.getElementById('bassKnob').dataset.rotation || 0;
+                    const trebleValue = document.getElementById('trebleKnob').dataset.rotation || 0;
+                    
+                    // Bass frequencies (first few bars)
+                    if (index < 4) {
+                        height = 20 + Math.abs(bassValue) / 4 + Math.random() * 20;
+                    } 
+                    // Mid frequencies
+                    else if (index < 10) {
+                        height = 30 + Math.random() * 40;
+                    } 
+                    // Treble frequencies (last few bars)
+                    else {
+                        height = 10 + Math.abs(trebleValue) / 4 + Math.random() * 15;
+                    }
+                    
+                    bar.style.height = `${Math.min(height, 100)}%`;
+                });
+            }
+            
+            // Play/Pause Functionality
+            playBtn.addEventListener('click', function() {
+                isPlaying = !isPlaying;
+                this.textContent = isPlaying ? '⏸' : '▶';
+                
+                if (isPlaying) {
+                    simulatePlayback();
+                }
+            });
+            
+            // Simulate Playback Progress
+            function simulatePlayback() {
+                if (!isPlaying) return;
+                
+                currentTime += 0.5;
+                if (currentTime >= duration) {
+                    currentTime = 0;
+                    isPlaying = false;
+                    playBtn.textContent = '▶';
+                }
+                
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Format time display
+                const mins = Math.floor(currentTime / 60);
+                const secs = Math.floor(currentTime % 60).toString().padStart(2, '0');
+                currentTimeEl.textContent = `${mins}:${secs}`;
+                
+                // Animate equalizer
+                updateEqualizer();
+                
+                requestAnimationFrame(simulatePlayback);
+            }
+            
+            // Mode Switch (Dark/Neon)
+            modeSwitch.addEventListener('change', function() {
+                document.body.style.background = this.checked ? '#000' : '#0a0a12';
+                const player = document.querySelector('.player-container');
+                player.style.boxShadow = this.checked ? 
+                    '0 0 20px var(--neon-emerald), 0 0 40px rgba(0, 255, 157, 0.5)' : 
+                    '0 0 10px var(--neon-emerald), 0 0 20px var(--neon-emerald), 0 0 30px rgba(0, 255, 157, 0.5)';
+            });
+            
+            // Initialize
+            durationEl.textContent = '4:32';
+            
+            // Animate equalizer even when not playing
+            setInterval(() => {
+                if (!isPlaying) {
+                    updateEqualizer();
+                }
+            }, 200);
+        });
+    </script>
+</body>
+</html>
