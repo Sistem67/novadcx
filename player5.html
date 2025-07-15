@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>zeroX Player</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a0a12;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 600px;
+      background: #1a1a24;
+      border: 4px solid #00ff9d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+      overflow: hidden;
+    }
+
+    .brand-stripe {
+      height: 50px;
+      background: linear-gradient(90deg, #000, #008a4f, #000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px #00ff9d;
+    }
+
+    .media-display {
+      height: 180px;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #00ff9d;
+      font-size: 16px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .vu-meters {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background: #111;
+    }
+
+    .vu-meter {
+      width: 45%;
+      height: 20px;
+      background: linear-gradient(90deg, #00ff00, #ffff00 70%, #ff0000);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vu-level {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.7);
+      transform-origin: right;
+      transform: scaleX(0);
+      transition: transform 0.1s;
+    }
+
+    .vu-label {
+      text-align: center;
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 5px;
+      text-transform: uppercase;
+    }
+
+    .slider-section {
+      background: #2a2a3a;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+    }
+
+    .led-bar {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .led {
+      width: 6px;
+      height: 6px;
+      background: #333;
+      border-radius: 50%;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .slider {
+      width: 100%;
+    }
+
+    .slider-label {
+      color: #ccc;
+      font-size: 11px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .transport-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: #15151e;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: #2a2a3a;
+      border: 1px solid #333;
+      color: #00ff9d;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .play-btn {
+      background: linear-gradient(#00aa77, #007a43);
+      color: black;
+    }
+
+    .url-loader {
+      display: flex;
+      padding: 15px;
+      background: #111;
+      border-top: 1px solid #333;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #00ff9d;
+      box-shadow: 0 0 5px #00ff9d;
+    }
+
+    .load-btn {
+      padding: 10px 15px;
+      margin-left: 10px;
+      background: #008a4f;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .load-btn:hover {
+      background: #00ff9d;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="brand-stripe">zeroX Player</div>
+    <div class="media-display" id="mediaDisplay">Yayın Bekleniyor...</div>
+
+    <div class="vu-meters">
+      <div>
+        <div class="vu-meter"><div class="vu-level" id="vuLeft"></div></div>
+        <div class="vu-label">Sol Kanal</div>
+      </div>
+      <div>
+        <div class="vu-meter"><div class="vu-level" id="vuRight"></div></div>
+        <div class="vu-label">Sağ Kanal</div>
+      </div>
+    </div>
+
+    <div class="slider-section">
+      <div class="slider-container">
+        <div class="led-bar" id="ledBass"></div>
+        <input type="range" class="slider" id="bassSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Bass</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledTreble"></div>
+        <input type="range" class="slider" id="trebleSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Treble</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledVolume"></div>
+        <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70"/>
+        <div class="slider-label">Volume</div>
+      </div>
+    </div>
+
+    <div class="transport-controls">
+      <button class="control-btn">⏮</button>
+      <button class="control-btn">⏪</button>
+      <button class="control-btn play-btn" id="playBtn">▶</button>
+      <button class="control-btn">⏩</button>
+      <button class="control-btn">⏭</button>
+    </div>
+
+    <div class="url-loader">
+      <input type="text" id="mediaUrl" class="url-input" placeholder="Medya URL'si girin...">
+      <button class="load-btn" id="loadBtn">Load</button>
+    </div>
+  </div>
+
+  <script>
+    const playBtn = document.getElementById("playBtn");
+    const vuLeft = document.getElementById("vuLeft");
+    const vuRight = document.getElementById("vuRight");
+    const mediaDisplay = document.getElementById("mediaDisplay");
+    let isPlaying = false;
+
+    const sliders = {
+      bass: document.getElementById("bassSlider"),
+      treble: document.getElementById("trebleSlider"),
+      volume: document.getElementById("volumeSlider"),
+    };
+
+    const leds = {
+      bass: document.getElementById("ledBass"),
+      treble: document.getElementById("ledTreble"),
+      volume: document.getElementById("ledVolume"),
+    };
+
+    function updateLeds(name) {
+      const container = leds[name];
+      container.innerHTML = "";
+      const value = parseInt(sliders[name].value);
+      const count = 10;
+      const active = Math.round((value / 100) * count);
+
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement("div");
+        led.className = "led";
+        if (i < active) {
+          const hue = 120 - (i * 120 / count);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        }
+        container.appendChild(led);
+      }
+    }
+
+    Object.keys(sliders).forEach((key) => {
+      sliders[key].addEventListener("input", () => updateLeds(key));
+      updateLeds(key);
+    });
+
+    function updateVU() {
+      if (!isPlaying) return;
+
+      const volume = parseInt(sliders.volume.value) / 100;
+      const bass = parseInt(sliders.bass.value) / 100;
+      const treble = parseInt(sliders.treble.value) / 100;
+
+      const left = Math.min(0.3 + Math.random() * bass + Math.random() * treble, 1) * volume;
+      const right = Math.min(0.3 + Math.random() * bass + Math.random() * treble, 1) * volume;
+
+      vuLeft.style.transform = `scaleX(${left.toFixed(2)})`;
+      vuRight.style.transform = `scaleX(${right.toFixed(2)})`;
+
+      requestAnimationFrame(updateVU);
+    }
+
+    playBtn.addEventListener("click", () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? "⏸" : "▶";
+      if (isPlaying) updateVU();
+    });
+
+    document.getElementById("loadBtn").addEventListener("click", () => {
+      const url = document.getElementById("mediaUrl").value.trim();
+      if (url) {
+        mediaDisplay.textContent = "Yayın Yüklendi:\n" + url;
+      } else {
+        mediaDisplay.textContent = "Lütfen geçerli bir URL girin.";
+      }
+    });
+  </script>
+</body>
+</html>
