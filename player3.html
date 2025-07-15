@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO STUDIO MASTER</title>
+    <style>
+        :root {
+            --emerald: #00ff9d;
+            --emerald-dark: #008a4f;
+            --glow: 0 0 10px rgba(0, 255, 157, 0.7);
+            --dark: #0a0a12;
+            --metal: linear-gradient(145deg, #1a1a24 0%, #0d0d14 100%);
+            --panel: linear-gradient(135deg, #2a2a3a 0%, #1a1a24 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 420px;
+            border: 4px solid var(--emerald);
+            border-radius: 12px;
+            background: var(--metal);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--glow);
+        }
+
+        .brand-stripe {
+            height: 40px;
+            background: linear-gradient(90deg, #000 10%, var(--emerald-dark) 50%, #000 90%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .brand-logo {
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--emerald);
+        }
+
+        /* Media Display Area */
+        .media-display {
+            height: 150px;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--emerald);
+            font-size: 14px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* VU Meters */
+        .vu-meters {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            background: #111;
+        }
+
+        .vu-meter {
+            width: 100%;
+            max-width: 160px;
+            height: 20px;
+            background: linear-gradient(90deg, 
+                #00ff00 0%, 
+                #ffff00 70%, 
+                #ff0000 100%);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .vu-level {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            transform-origin: right;
+            transform: scaleX(0.5);
+            transition: transform 0.1s;
+        }
+
+        .vu-label {
+            text-align: center;
+            color: #aaa;
+            font-size: 10px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Knob Controls */
+        .knob-section {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: var(--panel);
+        }
+
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #555, #222);
+            border: 3px solid #444;
+            box-shadow: 
+                inset 0 0 15px rgba(0,0,0,0.8),
+                0 5px 20px rgba(0,0,0,0.6);
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .knob::after {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 15px;
+            background: var(--emerald);
+            box-shadow: 0 0 5px var(--emerald);
+        }
+
+        .knob-label {
+            position: absolute;
+            bottom: -20px;
+            color: #ccc;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        /* LED Indicators around knobs */
+        .led-ring {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            top: -10px;
+            left: -10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .led {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #333;
+            margin: 1px;
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
+            transition: background 0.2s;
+        }
+
+        /* Transport Controls */
+        .transport-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: #15151e;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(#2a2a3a, #1a1a24);
+            border: 1px solid #333;
+            color: var(--emerald);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 
+                inset 0 1px 1px rgba(255,255,255,0.1),
+                0 2px 3px rgba(0,0,0,0.5);
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(#333344, #222233);
+            box-shadow: 0 0 10px var(--emerald);
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            background: linear-gradient(var(--emerald-dark), #007a43);
+            color: black;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #222;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--emerald);
+            width: 0%;
+            box-shadow: var(--glow);
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            color: #777;
+            font-size: 12px;
+            background: #15151e;
+        }
+
+        /* URL Loader */
+        .url-loader {
+            display: flex;
+            padding: 15px;
+            background: #111;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 5px var(--emerald);
+        }
+
+        .load-btn {
+            padding: 10px 15px;
+            background: var(--emerald-dark);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .load-btn:hover {
+            background: var(--emerald);
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <!-- Branding Stripe -->
+        <div class="brand-stripe">
+            <div class="brand-logo">PRO STUDIO MASTER</div>
+        </div>
+
+        <!-- Media Display -->
+        <div class="media-display">
+            MEDIA PLAYER READY
+        </div>
+
+        <!-- VU Meters -->
+        <div class="vu-meters">
+            <div>
+                <div class="vu-meter">
+                    <div class="vu-level" id="vuLeft"></div>
+                </div>
+                <div class="vu-label">Left Channel</div>
+            </div>
+            <div>
+                <div class="vu-meter">
+                    <div class="vu-level" id="vuRight"></div>
+                </div>
+                <div class="vu-label">Right Channel</div>
+            </div>
+        </div>
+
+        <!-- Knob Controls with LED Rings -->
+        <div class="knob-section">
+            <!-- Bass Knob -->
+            <div class="knob-container">
+                <div class="led-ring" id="bassLedRing">
+                    <!-- 12 LEDs in a circle -->
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                </div>
+                <div class="knob" id="bassKnob"></div>
+                <div class="knob-label">Bass</div>
+            </div>
+
+            <!-- Treble Knob -->
+            <div class="knob-container">
+                <div class="led-ring" id="trebleLedRing">
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                </div>
+                <div class="knob" id="trebleKnob"></div>
+                <div class="knob-label">Treble</div>
+            </div>
+
+            <!-- Volume Knob -->
+            <div class="knob-container">
+                <div class="led-ring" id="volumeLedRing">
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                    <div class="led"></div><div class="led"></div><div class="led"></div>
+                </div>
+                <div class="knob" id="volumeKnob"></div>
+                <div class="knob-label">Volume</div>
+            </div>
+        </div>
+
+        <!-- Transport Controls -->
+        <div class="transport-controls">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn">⏪</button>
+            <button class="control-btn play-btn" id="playBtn">▶</button>
+            <button class="control-btn">⏩</button>
+            <button class="control-btn">⏭</button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="time-display">
+            <span id="currentTime">0:00</span>
+            <span id="duration">4:32</span>
+        </div>
+
+        <!-- URL Loader -->
+        <div class="url-loader">
+            <input type="text" class="url-input" placeholder="Enter media URL...">
+            <button class="load-btn">Load</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const playBtn = document.getElementById('playBtn');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const vuLeft = document.getElementById('vuLeft');
+            const vuRight = document.getElementById('vuRight');
+            
+            // Knobs and their LED rings
+            const bassKnob = document.getElementById('bassKnob');
+            const trebleKnob = document.getElementById('trebleKnob');
+            const volumeKnob = document.getElementById('volumeKnob');
+            const bassLeds = document.querySelectorAll('#bassLedRing .led');
+            const trebleLeds = document.querySelectorAll('#trebleLedRing .led');
+            const volumeLeds = document.querySelectorAll('#volumeLedRing .led');
+            
+            // Player State
+            let isPlaying = false;
+            let currentTime = 0;
+            const duration = 272; // 4:32 in seconds
+            
+            // Initialize Knobs
+            initKnob(bassKnob, bassLeds, -30, 30, 0);
+            initKnob(trebleKnob, trebleLeds, -30, 30, 0);
+            initKnob(volumeKnob, volumeLeds, 0, 100, 70);
+            
+            // Knob Initialization Function
+            function initKnob(knob, leds, min, max, initial) {
+                let rotation = initial;
+                let value = ((initial - min) / (max - min)) * 100;
+                knob.dataset.rotation = initial;
+                knob.dataset.value = value;
+                knob.style.transform = `rotate(${initial}deg)`;
+                updateLedRing(leds, value);
+                
+                let isDragging = false;
+                let startY = 0;
+                let startRotation = initial;
+                
+                knob.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startY = e.clientY;
+                    startRotation = rotation;
+                    document.body.style.cursor = 'grabbing';
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaY = startY - e.clientY;
+                    rotation = Math.min(Math.max(startRotation + deltaY, min), max);
+                    value = ((rotation - min) / (max - min)) * 100;
+                    
+                    knob.style.transform = `rotate(${rotation}deg)`;
+                    knob.dataset.rotation = rotation;
+                    knob.dataset.value = value;
+                    
+                    updateLedRing(leds, value);
+                    updateVUMeters();
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    document.body.style.cursor = '';
+                });
+            }
+            
+            // Update LED Ring based on value (0-100)
+            function updateLedRing(leds, value) {
+                const activeLeds = Math.ceil((value / 100) * leds.length);
+                
+                leds.forEach((led, index) => {
+                    if (index < activeLeds) {
+                        // Gradient from green to red
+                        const hue = 120 - (index * 120 / leds.length);
+                        led.style.background = `hsl(${hue}, 100%, 50%)`;
+                        led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+                    } else {
+                        led.style.background = '#333';
+                        led.style.boxShadow = 'none';
+                    }
+                });
+            }
+            
+            // Update VU Meters
+            function updateVUMeters() {
+                // Simulate audio levels based on settings
+                const bassValue = parseInt(bassKnob.dataset.value) / 100;
+                const trebleValue = parseInt(trebleKnob.dataset.value) / 100;
+                const volumeValue = parseInt(volumeKnob.dataset.value) / 100;
+                
+                // Left channel simulation
+                const leftLevel = 0.3 + Math.random() * 0.2 * bassValue + 
+                                  Math.random() * 0.1 * trebleValue;
+                vuLeft.style.transform = `scaleX(${Math.min(leftLevel * volumeValue, 1)})`;
+                
+                // Right channel simulation
+                const rightLevel = 0.3 + Math.random() * 0.2 * bassValue + 
+                                  Math.random() * 0.1 * trebleValue;
+                vuRight.style.transform = `scaleX(${Math.min(rightLevel * volumeValue, 1)})`;
+            }
+            
+            // Play/Pause Functionality
+            playBtn.addEventListener('click', function() {
+                isPlaying = !isPlaying;
+                this.textContent = isPlaying ? '⏸' : '▶';
+                
+                if (isPlaying) {
+                    simulatePlayback();
+                }
+            });
+            
+            // Simulate Playback Progress
+            function simulatePlayback() {
+                if (!isPlaying) return;
+                
+                currentTime += 0.5;
+                if (currentTime >= duration) {
+                    currentTime = 0;
+                    isPlaying = false;
+                    playBtn.textContent = '▶';
+                }
+                
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Format time display
+                const mins = Math.floor(currentTime / 60);
+                const secs = Math.floor(currentTime % 60).toString().padStart(2, '0');
+                currentTimeEl.textContent = `${mins}:${secs}`;
+                
+                // Update VU meters
+                updateVUMeters();
+                
+                requestAnimationFrame(simulatePlayback);
+            }
+            
+            // Initialize
+            durationEl.textContent = '4:32';
+            
+            // Animate VU meters even when not playing
+            setInterval(() => {
+                if (!isPlaying) {
+                    updateVUMeters();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
