@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>zeroX Player Pro</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a0a12;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 800px;
+      background: #1a1a24;
+      border: 4px solid #00ff9d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+      overflow: hidden;
+    }
+
+    .brand-stripe {
+      height: 50px;
+      background: linear-gradient(90deg, #000, #008a4f, #000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px #00ff9d;
+      position: relative;
+    }
+
+    .media-display {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 200px;
+    }
+
+    .media-placeholder {
+      position: absolute;
+      font-size: 24px;
+      color: rgba(0, 255, 157, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      z-index: 1;
+    }
+
+    video {
+      width: 100%;
+      max-height: 400px;
+      background: black;
+      z-index: 2;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3;
+      font-size: 18px;
+      color: #00ff9d;
+      flex-direction: column;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 255, 157, 0.3);
+      border-radius: 50%;
+      border-top-color: #00ff9d;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .vu-meters {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: #111;
+    }
+
+    .vu-leds {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+      max-width: 360px;
+      height: 10px;
+      justify-content: flex-start;
+      align-items: center;
+      background: #000;
+      padding: 3px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .vu-led {
+      width: 6px;
+      height: 100%;
+      background: #333;
+      border-radius: 2px;
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+
+    .slider-section {
+      background: #2a2a3a;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+      min-width: 100px;
+    }
+
+    .led-bar {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .led {
+      width: 6px;
+      height: 6px;
+      background: #333;
+      border-radius: 50%;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .slider {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #00ff9d;
+      cursor: pointer;
+    }
+
+    .slider-label {
+      color: #ccc;
+      font-size: 11px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .transport-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: #15151e;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: #2a2a3a;
+      border: 1px solid #333;
+      color: #00ff9d;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      background: #3a3a4a;
+    }
+
+    .play-btn {
+      background: linear-gradient(#00aa77, #007a43);
+      color: black;
+    }
+
+    .play-btn:hover {
+      background: linear-gradient(#00cc88, #009a55);
+    }
+
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid #333;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      background: #222;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-right: 1px solid #333;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: #2a2a3a;
+      color: #00ff9d;
+      font-weight: bold;
+    }
+
+    .tab:hover:not(.active) {
+      background: #333;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 15px;
+      background: #111;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #00ff9d;
+      box-shadow: 0 0 5px #00ff9d;
+    }
+
+    .load-btn {
+      padding: 10px 15px;
+      background: #008a4f;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.3s;
+      width: 100%;
+    }
+
+    .load-btn:hover {
+      background: #00ff9d;
+      color: black;
+    }
+
+    .file-input-label {
+      display: block;
+      padding: 10px 15px;
+      background: #2a2a3a;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: center;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .file-input-label:hover {
+      background: #3a3a4a;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .playlist-container {
+      max-height: 150px;
+      overflow-y: auto;
+      background: #222;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .playlist-item {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #ccc;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .playlist-item:hover {
+      background: #333;
+      color: white;
+    }
+
+    .playlist-item.active {
+      background: #008a4f;
+      color: white;
+    }
+
+    .playlist-item-remove {
+      color: #ff5555;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .storage-controls {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      background: #111;
+      border-top: 1px solid #333;
+    }
+
+    .storage-btn {
+      padding: 8px 12px;
+      background: #2a2a3a;
+      border: none;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .storage-btn:hover {
+      background: #3a3a4a;
+    }
+
+    .storage-btn.save {
+      background: #008a4f;
+    }
+
+    .storage-btn.save:hover {
+      background: #00aa77;
+    }
+
+    .storage-btn.delete {
+      background: #8a0000;
+    }
+
+    .storage-btn.delete:hover {
+      background: #aa0000;
+    }
+
+    .status-bar {
+      padding: 8px 15px;
+      background: #111;
+      color: #00ff9d;
+      font-size: 12px;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .error-text {
+      color: #ff5555;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="brand-stripe">zeroX Player Pro</div>
+
+    <div class="media-display">
+      <div class="media-placeholder">zeroX</div>
+      <video id="video" crossorigin="anonymous"></video>
+      <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div>Medya Yükleniyor...</div>
+      </div>
+    </div>
+
+    <div class="vu-meters">
+      <div class="vu-leds" id="vuLeftLeds"></div>
+      <div class="vu-leds" id="vuRightLeds"></div>
+    </div>
+
+    <div class="slider-section">
+      <div class="slider-container">
+        <div class="led-bar" id="ledBass"></div>
+        <input type="range" class="slider" id="bassSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Bass</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledTreble"></div>
+        <input type="range" class="slider" id="trebleSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Treble</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledVolume"></div>
+        <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70"/>
+        <div class="slider-label">Volume</div>
+      </div>
+    </div>
+
+    <div class="transport-controls">
+      <button class="control-btn" id="prevBtn">⏮</button>
+      <button class="control-btn" id="rewindBtn">⏪</button>
+      <button class="control-btn play-btn" id="playBtn">▶</button>
+      <button class="control-btn" id="forwardBtn">⏩</button>
+      <button class="control-btn" id="nextBtn">⏭</button>
+    </div>
+
+    <div class="tab-container">
+      <div class="tab active" data-tab="urlTab">URL Yükle</div>
+      <div class="tab" data-tab="playlistTab">Playlist URL</div>
+      <div class="tab" data-tab="localTab">Yerel Dosya</div>
+      <div class="tab" data-tab="localPlaylistTab">Yerel Playlist</div>
+    </div>
+
+    <div class="tab-content active" id="urlTab">
+      <input type="text" id="mediaUrl" class="url-input" placeholder="Medya URL'si (.mp4, .mp3, .m3u8...)">
+      <button class="load-btn" id="loadUrlBtn">Yükle ve Oynat</button>
+    </div>
+
+    <div class="tab-content" id="playlistTab">
+      <input type="text" id="playlistUrl" class="url-input" placeholder="Playlist URL'si (.m3u, .m3u8)">
+      <button class="load-btn" id="loadPlaylistUrlBtn">Playlist Yükle</button>
+    </div>
+
+    <div class="tab-content" id="localTab">
+      <label class="file-input-label">
+        Medya Dosyası Seç
+        <input type="file" class="file-input" id="mediaFile" accept="video/*,audio/*">
+      </label>
+    </div>
+
+    <div class="tab-content" id="localPlaylistTab">
+      <label class="file-input-label">
+        Playlist Dosyası Seç
+        <input type="file" class="file-input" id="playlistFile" accept=".m3u,.m3u8,.txt">
+      </label>
+      <div class="storage-controls">
+        <button class="storage-btn" id="editBtn">Düzenle</button>
+        <button class="storage-btn save" id="saveBtn">Kaydet</button>
+        <button class="storage-btn delete" id="deleteBtn">Sil</button>
+      </div>
+    </div>
+
+    <div class="playlist-container" id="playlistContainer"></div>
+
+    <div class="status-bar">
+      <span id="nowPlaying">Yüklenecek medya bekleniyor...</span>
+      <span id="playlistStatus">Playlist: 0 öğe</span>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const video = document.getElementById("video");
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const rewindBtn = document.getElementById("rewindBtn");
+    const forwardBtn = document.getElementById("forwardBtn");
+    const vuLeftLeds = document.getElementById("vuLeftLeds");
+    const vuRightLeds = document.getElementById("vuRightLeds");
+    const mediaUrlInput = document.getElementById("mediaUrl");
+    const loadUrlBtn = document.getElementById("loadUrlBtn");
+    const playlistUrlInput = document.getElementById("playlistUrl");
+    const loadPlaylistUrlBtn = document.getElementById("loadPlaylistUrlBtn");
+    const mediaFileInput = document.getElementById("mediaFile");
+    const playlistFileInput = document.getElementById("playlistFile");
+    const playlistContainer = document.getElementById("playlistContainer");
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const nowPlayingSpan = document.getElementById("nowPlaying");
+    const playlistStatusSpan = document.getElementById("playlistStatus");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const mediaPlaceholder = document.querySelector(".media-placeholder");
+    const tabs = document.querySelectorAll(".tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    // Audio context and nodes
+    let context, source, analyser, gainNode, bassFilter, trebleFilter;
+    let analyserLeft, analyserRight, splitter;
+
+    // Playlist and state
+    let playlist = [];
+    let currentPlaylistIndex = -1;
+    let isEditing = false;
+    let isLoading = false;
+
+    // Sliders and LEDs
+    const sliders = {
+      bass: document.getElementById("bassSlider"),
+      treble: document.getElementById("trebleSlider"),
+      volume: document.getElementById("volumeSlider"),
+    };
+
+    const leds = {
+      bass: document.getElementById("ledBass"),
+      treble: document.getElementById("ledTreble"),
+      volume: document.getElementById("ledVolume"),
+    };
+
+    // Initialize the player
+    function initPlayer() {
+      setupEventListeners();
+      loadSavedData();
+      createVuLeds(vuLeftLeds);
+      createVuLeds(vuRightLeds);
+      Object.keys(sliders).forEach(key => updateLeds(key));
+      updateMediaPlaceholder();
+    }
+
+    // Tab switching
+    function setupTabs() {
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tabContents.forEach(c => c.classList.remove("active"));
+          
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.tab).classList.add("active");
+        });
+      });
+    }
+
+    // Set up all event listeners
+    function setupEventListeners() {
+      // Playback controls
+      playBtn.addEventListener("click", togglePlayback);
+      prevBtn.addEventListener("click", playPrevious);
+      nextBtn.addEventListener("click", playNext);
+      rewindBtn.addEventListener("click", () => seekVideo(-10));
+      forwardBtn.addEventListener("click", () => seekVideo(10));
+
+      // Sliders
+      Object.keys(sliders).forEach((key) => {
+        sliders[key].addEventListener("input", () => {
+          updateLeds(key);
+          applyAudioSettings();
+        });
+      });
+
+      // URL loading
+      loadUrlBtn.addEventListener("click", loadMediaFromUrl);
+      mediaUrlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") loadMediaFromUrl();
+      });
+
+      // Playlist URL loading
+      loadPlaylistUrlBtn.addEventListener("click", loadPlaylistFromUrl);
+      playlistUrlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") loadPlaylistFromUrl();
+      });
+
+      // File loading
+      mediaFileInput.addEventListener("change", handleMediaFile);
+      playlistFileInput.addEventListener("change", handlePlaylistFile);
+
+      // Storage controls
+      editBtn.addEventListener("click", toggleEditMode);
+      saveBtn.addEventListener("click", saveData);
+      deleteBtn.addEventListener("click", confirmDeleteData);
+
+      // Video events
+      video.addEventListener("ended", handleMediaEnded);
+      video.addEventListener("error", handleMediaError);
+      video.addEventListener("play", updatePlaybackStatus);
+      video.addEventListener("pause", updatePlaybackStatus);
+      video.addEventListener("waiting", showLoading);
+      video.addEventListener("playing", hideLoading);
+      video.addEventListener("canplay", hideLoading);
+
+      // Tab switching
+      setupTabs();
+    }
+
+    // LED controls
+    function updateLeds(name) {
+      const container = leds[name];
+      container.innerHTML = "";
+      const value = parseInt(sliders[name].value);
+      const count = 10;
+      const active = Math.round((value / 100) * count);
+      
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement("div");
+        led.className = "led";
+        if (i < active) {
+          const hue = 120 - (i * 120 / count);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        }
+        container.appendChild(led);
+      }
+    }
+
+    // Audio processing
+    function applyAudioSettings() {
+      if (!bassFilter || !trebleFilter || !gainNode) return;
+      bassFilter.gain.value = sliders.bass.value - 50;
+      trebleFilter.gain.value = sliders.treble.value - 50;
+      gainNode.gain.value = sliders.volume.value / 100;
+    }
+
+    function setupAudio() {
+      if (context) return;
+      
+      try {
+        context = new (window.AudioContext || window.webkitAudioContext)();
+        source = context.createMediaElementSource(video);
+        
+        // Create audio nodes
+        bassFilter = context.createBiquadFilter();
+        bassFilter.type = "lowshelf";
+        bassFilter.frequency.value = 200;
+
+        trebleFilter = context.createBiquadFilter();
+        trebleFilter.type = "highshelf";
+        trebleFilter.frequency.value = 3000;
+
+        gainNode = context.createGain();
+        splitter = context.createChannelSplitter(2);
+        
+        // Create separate analyzers for left and right channels
+        analyserLeft = context.createAnalyser();
+        analyserRight = context.createAnalyser();
+        analyserLeft.fftSize = 256;
+        analyserRight.fftSize = 256;
+
+        // Connect nodes
+        source.connect(bassFilter);
+        bassFilter.connect(trebleFilter);
+        trebleFilter.connect(gainNode);
+        gainNode.connect(splitter);
+        
+        // Connect left and right channels to separate analyzers
+        splitter.connect(analyserLeft, 0);
+        splitter.connect(analyserRight, 1);
+        
+        // Connect to destination
+        splitter.connect(context.destination);
+
+        applyAudioSettings();
+        animateVU();
+
+      } catch (error) {
+        console.error("Audio setup error:", error);
+        updateStatus("Ses işleme başlatılamadı: " + error.message, true);
+      }
+    }
+
+    // VU Meter controls
+    function createVuLeds(container, count = 40) {
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement('div');
+        led.className = 'vu-led';
+        container.appendChild(led);
+      }
+    }
+
+    function updateVuLeds(container, level, max = 40) {
+      const leds = container.querySelectorAll('.vu-led');
+      const active = Math.round(level * max);
+      leds.forEach((led, i) => {
+        if (i < active) {
+          const hue = 120 - (i * 120 / max);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        } else {
+          led.style.background = '#222';
+          led.style.boxShadow = 'none';
+        }
+      });
+    }
+
+    function animateVU() {
+      if (!analyserLeft || !analyserRight) return;
+      
+      const leftData = new Uint8Array(analyserLeft.frequencyBinCount);
+      const rightData = new Uint8Array(analyserRight.frequencyBinCount);
+
+      function draw() {
+        analyserLeft.getByteFrequencyData(leftData);
+        analyserRight.getByteFrequencyData(rightData);
+        
+        // Calculate average levels with smoothing
+        const leftAvg = leftData.reduce((a, b) => a + b, 0) / leftData.length / 255;
+        const rightAvg = rightData.reduce((a, b) => a + b, 0) / rightData.length / 255;
+
+        updateVuLeds(vuLeftLeds, leftAvg);
+        updateVuLeds(vuRightLeds, rightAvg);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // Playback controls
+    function togglePlayback() {
+      if (video.paused) {
+        if (video.src || video.currentSrc) {
+          video.play().then(() => {
+            playBtn.textContent = "⏸";
+            if (!context) setupAudio();
+          }).catch(error => {
+            updateStatus("Oynatma hatası: " + error.message, true);
+          });
+        } else {
+          updateStatus("Oynatılacak medya yok", true);
+        }
+      } else {
+        video.pause();
+        playBtn.textContent = "▶";
+      }
+    }
+
+    function seekVideo(seconds) {
+      if (!video.src && !video.currentSrc) return;
+      video.currentTime += seconds;
+    }
+
+    function playPrevious() {
+      if (playlist.length === 0) {
+        updateStatus("Playlist boş", true);
+        return;
+      }
+      const newIndex = (currentPlaylistIndex - 1 + playlist.length) % playlist.length;
+      playFromPlaylist(newIndex);
+    }
+
+    function playNext() {
+      if (playlist.length === 0) {
+        updateStatus("Playlist boş", true);
+        return;
+      }
+      const newIndex = (currentPlaylistIndex + 1) % playlist.length;
+      playFromPlaylist(newIndex);
+    }
+
+    function handleMediaEnded() {
+      if (playlist.length > 0) {
+        playNext();
+      } else {
+        updateNowPlaying("Medya sona erdi");
+      }
+    }
+
+    function handleMediaError() {
+      updateStatus("Medya yüklenirken hata oluştu", true);
+      if (playlist.length > 0) {
+        setTimeout(playNext, 2000); // Try next item after delay
+      }
+    }
+
+    function showLoading() {
+      if (!isLoading) {
+        isLoading = true;
+        loadingOverlay.style.display = "flex";
+      }
+    }
+
+    function hideLoading() {
+      isLoading = false;
+      loadingOverlay.style.display = "none";
+    }
+
+    function updateMediaPlaceholder() {
+      if (video.src || video.currentSrc) {
+        mediaPlaceholder.style.display = "none";
+      } else {
+        mediaPlaceholder.style.display = "block";
+      }
+    }
+
+    // Media loading
+    function loadMediaFromUrl() {
+      const url = mediaUrlInput.value.trim();
+      if (!url) {
+        updateStatus("Lütfen bir URL girin", true);
+        return;
+      }
+
+      // Clear playlist for single URL
+      currentPlaylistIndex = -1;
+      playlist = [];
+      renderPlaylist();
+      
+      loadMedia(url, "URL'den yüklendi");
+    }
+
+    async function loadPlaylistFromUrl() {
+      const url = playlistUrlInput.value.trim();
+      if (!url) {
+        updateStatus("Lütfen bir playlist URL'si girin", true);
+        return;
+      }
+
+      showLoading();
+      updateStatus("Playlist yükleniyor...", false);
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Playlist indirilemedi");
+        
+        const playlistText = await response.text();
+        const lines = playlistText.split('\n').filter(line => 
+          line.trim() && !line.startsWith('#') && !line.match(/^#EXT/)
+        );
+        
+        if (lines.length === 0) {
+          throw new Error("Playlist boş veya geçersiz format");
+        }
+
+        // Create playlist items
+        const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
+        const newPlaylist = lines.map(line => {
+          const src = line.startsWith('http') ? line.trim() : baseUrl + line.trim();
+          return {
+            name: extractNameFromUrl(src),
+            src: src
+          };
+        });
+
+        loadPlaylist(newPlaylist);
+        updateStatus(`Playlist yüklendi: ${newPlaylist.length} öğe`, false);
+
+      } catch (error) {
+        console.error("Playlist load error:", error);
+        updateStatus("Playlist yükleme hatası: " + error.message, true);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function extractNameFromUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        const path = urlObj.pathname;
+        const filename = path.split('/').pop();
+        return filename || url;
+      } catch {
+        return url;
+      }
+    }
+
+    function handleMediaFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Clear playlist for single file
+      currentPlaylistIndex = -1;
+      playlist = [];
+      renderPlaylist();
+      
+      const url = URL.createObjectURL(file);
+      loadMedia(url, file.name);
+    }
+
+    async function handlePlaylistFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      showLoading();
+      updateStatus("Playlist yükleniyor...", false);
+
+      try {
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => 
+          line.trim() && !line.startsWith('#') && !line.match(/^EXT/)
+        );
+
+        const newPlaylist = lines.map(line => {
+          const src = line.startsWith('http') ? line.trim() : URL.createObjectURL(file);
+          return {
+            name: extractNameFromUrl(line.trim()),
+            src: src
+          };
+        });
+
+        loadPlaylist(newPlaylist);
+        updateStatus(`Playlist yüklendi: ${newPlaylist.length} öğe`, false);
+
+      } catch (error) {
+        console.error("Playlist file error:", error);
+        updateStatus("Playlist dosyası okunamadı: " + error.message, true);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function loadMedia(src, name = "") {
+      if (!src) return;
+
+      showLoading();
+      updateStatus("Medya yükleniyor...", false);
+
+      // Clean up previous object URLs
+      if (currentPlaylistIndex >= 0 && playlist[currentPlaylistIndex]?.objectUrl) {
+        URL.revokeObjectURL(playlist[currentPlaylistIndex].objectUrl);
+      }
+
+      video.src = src;
+      video.load();
+      
+      video.play().then(() => {
+        playBtn.textContent = "⏸";
+        if (!context) setupAudio();
+        updateStatus(name || "Medya yüklendi", false);
+        updateNowPlaying(name || src);
+        updateMediaPlaceholder();
+        saveData();
+      }).catch(error => {
+        console.error("Playback failed:", error);
+        updateStatus("Oynatma başlatılamadı: " + error.message, true);
+      }).finally(() => {
+        hideLoading();
+      });
+    }
+
+    // Playlist management
+    function loadPlaylist(newPlaylist) {
+      // Clear previous playlist
+      clearPlaylist(false);
+      
+      // Add new items
+      playlist = newPlaylist.map((item, index) => ({
+        id: Date.now() + index,
+        name: item.name || `Öğe ${index + 1}`,
+        src: item.src,
+        file: item.file || null
+      }));
+
+      renderPlaylist();
+      if (playlist.length > 0) {
+        currentPlaylistIndex = 0;
+        playFromPlaylist(currentPlaylistIndex);
+      }
+    }
+
+    function renderPlaylist() {
+      playlistContainer.innerHTML = '';
+      
+      playlist.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = `playlist-item ${index === currentPlaylistIndex ? 'active' : ''}`;
+        itemElement.innerHTML = `
+          <span>${item.name}</span>
+          ${isEditing ? `<span class="playlist-item-remove" data-id="${item.id}">×</span>` : ''}
+        `;
+        
+        itemElement.addEventListener('click', () => playFromPlaylist(index));
+        playlistContainer.appendChild(itemElement);
+      });
+
+      // Add remove handlers if in edit mode
+      if (isEditing) {
+        document.querySelectorAll('.playlist-item-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removePlaylistItem(parseInt(btn.dataset.id));
+          });
+        });
+      }
+
+      updatePlaylistStatus();
+    }
+
+    function playFromPlaylist(index) {
+      if (index < 0 || index >= playlist.length) return;
+      
+      currentPlaylistIndex = index;
+      const item = playlist[index];
+      
+      loadMedia(item.src, item.name);
+      renderPlaylist();
+    }
+
+    function removePlaylistItem(id) {
+      const index = playlist.findIndex(item => item.id === id);
+      if (index === -1) return;
+
+      // Revoke object URL if it's a file
+      if (playlist[index].file) {
+        URL.revokeObjectURL(playlist[index].src);
+      }
+
+      playlist.splice(index, 1);
+      
+      // Adjust current index if needed
+      if (currentPlaylistIndex === index) {
+        if (playlist.length === 0) {
+          currentPlaylistIndex = -1;
+          video.src = "";
+          updateNowPlaying("Playlist boş");
+          updateMediaPlaceholder();
+        } else {
+          currentPlaylistIndex = Math.min(index, playlist.length - 1);
+          playFromPlaylist(currentPlaylistIndex);
+        }
+      } else if (currentPlaylistIndex > index) {
+        currentPlaylistIndex--;
+      }
+
+      renderPlaylist();
+    }
+
+    function clearPlaylist(clearCurrent = true) {
+      // Revoke all object URLs
+      playlist.forEach(item => {
+        if (item.file) {
+          URL.revokeObjectURL(item.src);
+        }
+      });
+      
+      playlist = [];
+      currentPlaylistIndex = -1;
+      
+      renderPlaylist();
+      updatePlaylistStatus();
+      
+      if (clearCurrent) {
+        video.src = "";
+        updateNowPlaying("Playlist temizlendi");
+        updateMediaPlaceholder();
+      }
+    }
+
+    // Storage management
+    function loadSavedData() {
+      const savedData = localStorage.getItem('zeroXPlayerData');
+      if (!savedData) return;
+
+      try {
+        const data = JSON.parse(savedData);
+        
+        // Load audio settings
+        if (data.audioSettings) {
+          sliders.bass.value = data.audioSettings.bass || 50;
+          sliders.treble.value = data.audioSettings.treble || 50;
+          sliders.volume.value = data.audioSettings.volume || 70;
+          Object.keys(sliders).forEach(key => updateLeds(key));
+        }
+        
+        // Load playlist
+        if (data.playlist && data.playlist.length > 0) {
+          playlist = data.playlist.map(item => ({
+            ...item,
+            id: item.id || Date.now() + Math.floor(Math.random() * 1000)
+          }));
+          
+          renderPlaylist();
+          updatePlaylistStatus();
+          
+          // Load last played item
+          if (data.lastPlayed) {
+            if (data.lastPlayed.type === 'url') {
+              mediaUrlInput.value = data.lastPlayed.src;
+              loadMedia(data.lastPlayed.src, "Kayıtlı medya");
+            } else if (data.lastPlayed.type === 'playlist' && data.lastPlayed.index !== undefined) {
+              currentPlaylistIndex = Math.min(data.lastPlayed.index, playlist.length - 1);
+              playFromPlaylist(currentPlaylistIndex);
+            }
+          } else if (playlist.length > 0) {
+            currentPlaylistIndex = 0;
+            playFromPlaylist(currentPlaylistIndex);
+          }
+        }
+        
+        updateStatus("Kayıtlı ayarlar yüklendi", false);
+
+      } catch (error) {
+        console.error("Load saved data error:", error);
+        updateStatus("Kayıtlı veriler yüklenirken hata oluştu", true);
+      }
+    }
+
+    function saveData() {
+      const data = {
+        lastPlayed: {
+          type: currentPlaylistIndex >= 0 ? 'playlist' : 'url',
+          src: currentPlaylistIndex >= 0 ? playlist[currentPlaylistIndex].src : video.src,
+          index: currentPlaylistIndex
+        },
+        playlist: playlist.map(item => ({
+          id: item.id,
+          name: item.name,
+          src: item.src
+        })),
+        audioSettings: {
+          bass: sliders.bass.value,
+          treble: sliders.treble.value,
+          volume: sliders.volume.value
+        }
+      };
+      
+      try {
+        localStorage.setItem('zeroXPlayerData', JSON.stringify(data));
+        updateStatus("Ayarlar kaydedildi", false);
+      } catch (error) {
+        console.error("Save data error:", error);
+        updateStatus("Kaydetme hatası: " + error.message, true);
+      }
+    }
+
+    function confirmDeleteData() {
+      if (confirm('Tüm kayıtlı verileri ve playlisti silmek istediğinize emin misiniz?')) {
+        localStorage.removeItem('zeroXPlayerData');
+        clearPlaylist();
+        mediaUrlInput.value = "";
+        playlistUrlInput.value = "";
+        
+        // Reset audio settings to defaults
+        sliders.bass.value = 50;
+        sliders.treble.value = 50;
+        sliders.volume.value = 70;
+        Object.keys(sliders).forEach(key => updateLeds(key));
+        
+        updateStatus("Tüm veriler silindi", false);
+        updateNowPlaying("Sıfırlandı");
+        updateMediaPlaceholder();
+      }
+    }
+
+    // UI state management
+    function toggleEditMode() {
+      isEditing = !isEditing;
+      
+      if (isEditing) {
+        editBtn.textContent = 'Düzenleme Modu: AÇIK';
+        editBtn.style.background = '#008a4f';
+      } else {
+        editBtn.textContent = 'Düzenle';
+        editBtn.style.background = '#2a2a3a';
+      }
+      
+      renderPlaylist();
+    }
+
+    function updateNowPlaying(text) {
+      nowPlayingSpan.textContent = text || (playlist[currentPlaylistIndex]?.name || video.src || "Yüklenecek medya bekleniyor...");
+    }
+
+    function updatePlaylistStatus() {
+      playlistStatusSpan.textContent = `Playlist: ${playlist.length} öğe` + 
+        (currentPlaylistIndex >= 0 ? ` (Şu anki: ${currentPlaylistIndex + 1})` : "");
+    }
+
+    function updateStatus(message, isError = false) {
+      nowPlayingSpan.textContent = message;
+      nowPlayingSpan.style.color = isError ? '#ff5555' : '#00ff9d';
+      
+      if (!isError) {
+        setTimeout(() => {
+          if (nowPlayingSpan.textContent === message) {
+            updateNowPlaying();
+          }
+        }, 3000);
+      }
+    }
+
+    function updatePlaybackStatus() {
+      if (!video.paused) {
+        playBtn.textContent = "⏸";
+      } else {
+        playBtn.textContent = "▶";
+      }
+    }
+
+    // Initialize the player
+    initPlayer();
+  </script>
+</body>
+</html>
