@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Static IP Configuration - BURAYI DÜZENLEYİN
-STATIC_IP="188.3.254.105"  # Kendi sabit IP'nizi buraya girin
+STATIC_IP="192.168.1.3"  # Kendi sabit IP'nizi buraya girin
 DOMAIN="$STATIC_IP"         # SSL olmadan IP üzerinden erişim
 
 # Variables
