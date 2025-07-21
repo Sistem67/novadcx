@@ -24,7 +24,7 @@ const cheerio = require('cheerio');
 
 const mediaPath = '/mnt/usb';
 const port = 8000;
-const externalURL = 'https://siteadresi.com/index/of/mp3/'; // 🔁 BURAYI DEĞİŞTİR
+const externalURL = 'https://siteadresi.com/index/of/mp3/'; // BURAYI DEĞİŞTİR
 
 const server = http.createServer((req, res) => {
   if (req.url === '/') {
