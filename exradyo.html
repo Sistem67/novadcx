@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KarbonEx Radyo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a0a12;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 800px;
+      background: #1a1a24;
+      border: 4px solid #00ff9d;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+      overflow: hidden;
+    }
+
+    .brand-stripe {
+      height: 50px;
+      background: linear-gradient(90deg, #000, #008a4f, #000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px #00ff9d;
+    }
+
+    .media-display {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .radio-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .radio-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #333;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      transition: all 0.3s;
+    }
+
+    .status-led.online {
+      background: #00ff9d;
+      box-shadow: 0 0 10px #00ff9d;
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-led.offline {
+      background: #ff3a3a;
+      box-shadow: 0 0 10px #ff3a3a;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .status-text {
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .station-name {
+      color: #00ff9d;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .vu-meters {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: #111;
+    }
+
+    .vu-leds {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+      max-width: 360px;
+      height: 10px;
+      justify-content: flex-start;
+      align-items: center;
+      background: #000;
+      padding: 3px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .vu-led {
+      width: 6px;
+      height: 100%;
+      background: #333;
+      border-radius: 2px;
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+
+    .slider-section {
+      background: #2a2a3a;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+      min-width: 100px;
+    }
+
+    .led-bar {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .led {
+      width: 6px;
+      height: 6px;
+      background: #333;
+      border-radius: 50%;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .slider {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #00ff9d;
+      cursor: pointer;
+    }
+
+    .slider-label {
+      color: #ccc;
+      font-size: 11px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .transport-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: #15151e;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background: #2a2a3a;
+      border: 1px solid #333;
+      color: #00ff9d;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px rgba(0, 255, 157, 0.5);
+    }
+
+    .play-btn {
+      background: linear-gradient(#00aa77, #007a43);
+      color: black;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(0, 255, 157, 0.3);
+      border-radius: 50%;
+      border-top-color: #00ff9d;
+      animation: spin 1s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .loading-spinner.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <div class="brand-stripe">KarbonEx Radyo</div>
+
+    <div class="media-display">
+      <div class="loading-spinner" id="loadingSpinner"></div>
+      <div class="radio-info">
+        <div class="radio-status">
+          <div class="status-led offline" id="statusLed"></div>
+          <div class="status-text" id="statusText">Yayın Yok</div>
+        </div>
+        <div class="station-name" id="stationName">KarbonEx Radyo</div>
+      </div>
+    </div>
+
+    <div class="vu-meters">
+      <div class="vu-leds" id="vuLeftLeds"></div>
+      <div class="vu-leds" id="vuRightLeds"></div>
+    </div>
+
+    <div class="slider-section">
+      <div class="slider-container">
+        <div class="led-bar" id="ledBass"></div>
+        <input type="range" class="slider" id="bassSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Bass</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledTreble"></div>
+        <input type="range" class="slider" id="trebleSlider" min="0" max="100" value="50"/>
+        <div class="slider-label">Treble</div>
+      </div>
+      <div class="slider-container">
+        <div class="led-bar" id="ledVolume"></div>
+        <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70"/>
+        <div class="slider-label">Volume</div>
+      </div>
+    </div>
+
+    <div class="transport-controls">
+      <button class="control-btn play-btn" id="playBtn">▶</button>
+    </div>
+  </div>
+
+  <script>
+    const playBtn = document.getElementById("playBtn");
+    const vuLeftLeds = document.getElementById("vuLeftLeds");
+    const vuRightLeds = document.getElementById("vuRightLeds");
+    const statusLed = document.getElementById("statusLed");
+    const statusText = document.getElementById("statusText");
+    const stationName = document.getElementById("stationName");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+
+    let context, source, analyser, gainNode, bassFilter, trebleFilter;
+    let audio = new Audio();
+    let isPlaying = false;
+    let hls;
+    
+    // Radyo stream URL'si
+    const radioStreamUrl = "https://yayin.radiolight.net:8005/live";
+
+    const sliders = {
+      bass: document.getElementById("bassSlider"),
+      treble: document.getElementById("trebleSlider"),
+      volume: document.getElementById("volumeSlider"),
+    };
+
+    const leds = {
+      bass: document.getElementById("ledBass"),
+      treble: document.getElementById("ledTreble"),
+      volume: document.getElementById("ledVolume"),
+    };
+
+    // HLS.js yükleme
+    function loadHls() {
+      return new Promise((resolve) => {
+        if (typeof Hls !== 'undefined') {
+          resolve();
+          return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+
+    function updateLeds(name) {
+      const container = leds[name];
+      container.innerHTML = "";
+      const value = parseInt(sliders[name].value);
+      const count = 10;
+      const active = Math.round((value / 100) * count);
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement("div");
+        led.className = "led";
+        if (i < active) {
+          const hue = 120 - (i * 120 / count);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        }
+        container.appendChild(led);
+      }
+    }
+
+    Object.keys(sliders).forEach((key) => {
+      sliders[key].addEventListener("input", () => {
+        updateLeds(key);
+        applyAudioSettings();
+      });
+      updateLeds(key);
+    });
+
+    function applyAudioSettings() {
+      if (!bassFilter || !trebleFilter || !gainNode) return;
+      bassFilter.gain.value = sliders.bass.value - 50;
+      trebleFilter.gain.value = sliders.treble.value - 50;
+      gainNode.gain.value = sliders.volume.value / 100;
+    }
+
+    function createVuLeds(container, count = 40) {
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const led = document.createElement('div');
+        led.className = 'vu-led';
+        container.appendChild(led);
+      }
+    }
+
+    function updateVuLeds(container, level, max = 40) {
+      const leds = container.querySelectorAll('.vu-led');
+      const active = Math.round(level * max);
+      leds.forEach((led, i) => {
+        if (i < active) {
+          const hue = 120 - (i * 120 / max);
+          led.style.background = `hsl(${hue}, 100%, 50%)`;
+          led.style.boxShadow = `0 0 5px hsl(${hue}, 100%, 50%)`;
+        } else {
+          led.style.background = '#222';
+          led.style.boxShadow = 'none';
+        }
+      });
+    }
+
+    function updateStatus(online, loading = false) {
+      if (loading) {
+        loadingSpinner.classList.add('active');
+        statusText.textContent = 'Bağlanıyor...';
+        return;
+      }
+      
+      loadingSpinner.classList.remove('active');
+      
+      if (online) {
+        statusLed.classList.remove('offline');
+        statusLed.classList.add('online');
+        statusText.textContent = 'Canlı Yayın';
+      } else {
+        statusLed.classList.remove('online');
+        statusLed.classList.add('offline');
+        statusText.textContent = 'Yayın Yok';
+      }
+    }
+
+    function setupAudio() {
+      try {
+        if (context) {
+          context.close();
+        }
+        
+        context = new (window.AudioContext || window.webkitAudioContext)();
+        source = context.createMediaElementSource(audio);
+
+        bassFilter = context.createBiquadFilter();
+        bassFilter.type = "lowshelf";
+        bassFilter.frequency.value = 200;
+
+        trebleFilter = context.createBiquadFilter();
+        trebleFilter.type = "highshelf";
+        trebleFilter.frequency.value = 3000;
+
+        gainNode = context.createGain();
+
+        analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+
+        source.connect(bassFilter);
+        bassFilter.connect(trebleFilter);
+        trebleFilter.connect(gainNode);
+        gainNode.connect(analyser);
+        analyser.connect(context.destination);
+
+        applyAudioSettings();
+        animateVU();
+      } catch (error) {
+        console.error("Audio context hatası:", error);
+        updateStatus(false);
+      }
+    }
+
+    function animateVU() {
+      createVuLeds(vuLeftLeds);
+      createVuLeds(vuRightLeds);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      function draw() {
+        if (!analyser) return;
+        
+        analyser.getByteFrequencyData(data);
+        const half = data.length / 2;
+        const leftAvg = data.slice(0, half).reduce((a, b) => a + b, 0) / half / 255;
+        const rightAvg = data.slice(half).reduce((a, b) => a + b, 0) / half / 255;
+
+        updateVuLeds(vuLeftLeds, leftAvg);
+        updateVuLeds(vuRightLeds, rightAvg);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    async function playStream() {
+      if (isPlaying) return;
+      
+      updateStatus(false, true);
+      isPlaying = true;
+      playBtn.disabled = true;
+
+      try {
+        // HLS kontrolü
+        if (radioStreamUrl.includes('.m3u8')) {
+          await loadHls();
+          if (Hls.isSupported()) {
+            if (hls) {
+              hls.destroy();
+            }
+            hls = new Hls();
+            hls.loadSource(radioStreamUrl);
+            hls.attachMedia(audio);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              audio.play().catch(e => {
+                console.error("HLS play error:", e);
+                updateStatus(false);
+                playBtn.disabled = false;
+                isPlaying = false;
+              });
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              console.error("HLS error:", data);
+              if (data.fatal) {
+                updateStatus(false);
+                playBtn.disabled = false;
+                isPlaying = false;
+              }
+            });
+          } else {
+            // HLS desteklenmiyorsa normal audio elementini dene
+            audio.src = radioStreamUrl;
+            await audio.play();
+          }
+        } else {
+          // Standart radyo streami
+          audio.src = radioStreamUrl;
+          await audio.play();
+        }
+
+        playBtn.textContent = "⏸";
+        playBtn.disabled = false;
+        if (!context) setupAudio();
+        updateStatus(true);
+      } catch (error) {
+        console.error("Radyo oynatma hatası:", error);
+        
+        // Cross-origin hatası için farklı yaklaşım
+        if (error.name === 'NotAllowedError' || error.name === 'NotSupportedError') {
+          try {
+            // Proxy kullanarak tekrar deneyelim
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${radioStreamUrl}`;
+            audio.src = proxyUrl;
+            await audio.play();
+            playBtn.textContent = "⏸";
+            playBtn.disabled = false;
+            if (!context) setupAudio();
+            updateStatus(true);
+            return;
+          } catch (proxyError) {
+            console.error("Proxy ile oynatma hatası:", proxyError);
+          }
+        }
+        
+        updateStatus(false);
+        playBtn.disabled = false;
+        isPlaying = false;
+      }
+    }
+
+    function stopStream() {
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      
+      audio.pause();
+      audio.src = '';
+      if (context) {
+        context.close();
+        context = null;
+      }
+      playBtn.textContent = "▶";
+      isPlaying = false;
+      updateStatus(false);
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (isPlaying) {
+        stopStream();
+      } else {
+        playStream();
+      }
+    });
+
+    // Yayın durumunu izle
+    audio.addEventListener('error', () => {
+      updateStatus(false);
+      isPlaying = false;
+      playBtn.disabled = false;
+    });
+
+    audio.addEventListener('playing', () => {
+      updateStatus(true);
+      isPlaying = true;
+      playBtn.disabled = false;
+    });
+
+    audio.addEventListener('waiting', () => {
+      updateStatus(false, true);
+    });
+
+    audio.addEventListener('stalled', () => {
+      updateStatus(false, true);
+    });
+
+    // Sayfa yüklendiğinde HLS kontrolü
+    function checkHlsSupport() {
+      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+        console.log("HLS.js destekleniyor");
+      } else if (radioStreamUrl.includes('.m3u8')) {
+        console.warn("HLS.js yüklenmedi veya desteklenmiyor");
+      }
+    }
+
+    // HLS.js yüklendikten sonra kontrol et
+    const hlsCheckInterval = setInterval(() => {
+      if (typeof Hls !== 'undefined') {
+        clearInterval(hlsCheckInterval);
+        checkHlsSupport();
+      }
+    }, 100);
+
+    // Sayfa kapatılırken temizlik
+    window.addEventListener('beforeunload', () => {
+      stopStream();
+    });
+  </script>
+</body>
+</html>
