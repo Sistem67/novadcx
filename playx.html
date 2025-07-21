@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Otomatik Radyo + Canlı Chat + Dinleyici Listesi</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+  body {
+    background:#121212; color:#eee; min-height:100vh;
+    display:flex; justify-content:center; align-items:flex-start; padding:20px;
+  }
+  .container {
+    width: 960px;
+    background:#1e1e1e; border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.7);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-gap: 20px;
+    padding: 25px;
+  }
+  .player-section {
+    grid-column: 1 / 2;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .title {
+    font-size: 32px; font-weight: 700; margin-bottom: 20px;
+    color: #a3d2ca; text-shadow: 0 0 15px #0ff;
+    text-align: center;
+  }
+  #nowPlaying {
+    font-size: 20px; margin-bottom: 15px; min-height: 36px;
+    color: #f8f9fa;
+    text-align: center;
+  }
+  audio {
+    width: 100%;
+    border-radius: 12px;
+    outline: none;
+    background: #222;
+    box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+  }
+
+  .listeners-section {
+    grid-column: 2 / 3;
+    background: #222;
+    border-radius: 12px;
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 430px;
+    font-size: 14px;
+  }
+  .listeners-section h2 {
+    color: #0ff;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .listener {
+    background: #333;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px #0ff;
+    word-wrap: break-word;
+  }
+  .listener strong {
+    display: block;
+    font-weight: 700;
+    color: #a3d2ca;
+  }
+
+  .chat-section {
+    grid-column: 3 / 4;
+    background: #222;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .chat-header {
+    padding: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    background: #111;
+    color: #0ff;
+    text-align: center;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid #0ff;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #eee;
+  }
+  .chat-message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #333;
+    border-radius: 12px;
+    box-shadow: inset 0 0 5px #0ff;
+    word-wrap: break-word;
+  }
+  .chat-input-container {
+    display: flex;
+    padding: 12px 15px;
+    border-top: 2px solid #0ff;
+    background: #111;
+  }
+  .chat-input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: #222;
+    color: #eee;
+    box-shadow: inset 0 0 6px #0ff;
+    transition: background-color 0.2s ease;
+  }
+  .chat-input:focus {
+    background: #2a2a2a;
+  }
+  .send-btn {
+    background: #0ff;
+    border: none;
+    margin-left: 12px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: #111;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 12px #0ff;
+    transition: background-color 0.3s ease;
+  }
+  .send-btn:hover {
+    background: #00b8b8;
+  }
+  .chat-messages::-webkit-scrollbar,
+  .listeners-section::-webkit-scrollbar {
+    width: 8px;
+  }
+  .chat-messages::-webkit-scrollbar-track,
+  .listeners-section::-webkit-scrollbar-track {
+    background: #111;
+  }
+  .chat-messages::-webkit-scrollbar-thumb,
+  .listeners-section::-webkit-scrollbar-thumb {
+    background: #0ff;
+    border-radius: 20px;
+  }
+  @media (max-width: 960px) {
+    .container {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .player-section, .listeners-section, .chat-section {
+      grid-column: 1 / 2;
+      margin-bottom: 20px;
+    }
+    .listeners-section, .chat-section {
+      max-height: none;
+      height: 300px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <section class="player-section">
+    <div class="title">Otomatik Radyo İstasyonu</div>
+    <div id="nowPlaying">Yayın bilgisi otomatik alınıyor...</div>
+    <audio id="audioPlayer" autoplay controls></audio>
+  </section>
+
+  <section class="listeners-section">
+    <h2>Şu anda Dinleyenler</h2>
+    <div id="listenersList">Yükleniyor...</div>
+  </section>
+
+  <section class="chat-section">
+    <div class="chat-header">Canlı Mesajlar</div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <form id="chatForm" class="chat-input-container">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Mesaj yaz..." autocomplete="off" required maxlength="200" />
+      <button type="submit" class="send-btn">Gönder</button>
+    </form>
+  </section>
+</div>
+
+<script>
+(() => {
+  const audioPlayer = document.getElementById('audioPlayer');
+  const nowPlaying = document.getElementById('nowPlaying');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const listenersList = document.getElementById('listenersList');
+
+  // Yayın URL'sini buraya yaz (örnek: http://sabitip:8000/stream)
+  const streamUrl = 'http://' + location.hostname + ':8000/stream';
+
+  audioPlayer.src = streamUrl;
+  audioPlayer.play().catch(() => {
+    audioPlayer.muted = true;
+    audioPlayer.play();
+  });
+
+  nowPlaying.textContent = 'Yayın akışı: Otomatik Radyo';
+
+  // WebSocket adresi (Node.js backend portu)
+  const wsUrl = 'ws://' + location.hostname + ':8080';
+  let ws;
+
+  function addChatMessage(msg) {
+    const div = document.createElement('div');
+    div.className = 'chat-message';
+    div.textContent = msg;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function updateListeners(listeners) {
+    if (!listeners || listeners.length === 0) {
+      listenersList.textContent = 'Şu anda kimse dinlemiyor.';
+      return;
+    }
+    listenersList.innerHTML = '';
+    listeners.forEach(listener => {
+      const div = document.createElement('div');
+      div.className = 'listener';
+      div.innerHTML = `<strong>IP:</strong> ${listener.ip}<br>
+                       <strong>Bağlantı Zamanı:</strong> ${listener.connectedAt}<br>
+                       <strong>User Agent:</strong> ${listener.userAgent}`;
+      listenersList.appendChild(div);
+    });
+  }
+
+  function connectWs() {
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      addChatMessage('✅ Canlı sohbet başladı.');
+    };
+
+    ws.onmessage = event => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'chat') {
+          addChatMessage(data.message);
+        } else if (data.type === 'listeners') {
+          updateListeners(data.listeners);
+        } else if (data.type === 'nowPlaying') {
+          nowPlaying.textContent = data.info;
+        }
+      } catch {
+        addChatMessage(event.data);
+      }
+    };
+
+    ws.onclose = () => {
+      addChatMessage('⚠️ Bağlantı kesildi. Yeniden bağlanıyor...');
+      setTimeout(connectWs, 3000);
+    };
+
+    ws.onerror = err => {
+      console.error('WebSocket Hatası:', err);
+    };
+  }
+
+  connectWs();
+
+  chatForm.onsubmit = e => {
+    e.preventDefault();
+    const message = chatInput.value.trim();
+    if (message && ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'chat', message }));
+      chatInput.value = '';
+    }
+  };
+})();
+</script>
+
+</body>
+</html>
